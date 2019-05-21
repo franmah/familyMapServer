@@ -1,6 +1,7 @@
 package dao;
 
 import models.User;
+import models.AuthToken;
 import java.time.LocalTime;
 import java.sql.*;
 
@@ -44,12 +45,13 @@ public class UserDAO{
          stmt = connection.prepareStatement(query);
 
          stmt.setString(1, user.getUserName());
-         stmt.setString(2, user.getPersonId());
          stmt.setString(3, user.getPassword());
          stmt.setString(4, user.getEmail());
          stmt.setString(5, user.getFirstName());
          stmt.setString(6, user.getLastName());
          stmt.setString(7, user.getGender());
+         stmt.setString(2, user.getPersonId());
+
 
          stmt.executeUpdate();
          commit = true;
@@ -78,6 +80,8 @@ public class UserDAO{
             db.closeConnection(connection, commit);
          }
       }
+
+      System.out.println(LocalTime.now() + " UserDAO.addUser(): User: \"" + user.getUserName() + "\" has been added");
       return true;
    }
    
@@ -88,12 +92,24 @@ public class UserDAO{
     * @return  the user as a User object. Will return null if the user is not connected.
     */
    public User connectUser(String user_name, String password) throws DataBaseException {
-      
+      User user = null;
+
+      // Check if user is registered ?
+      user = isRegistered(user_name);
+      if(user == null){
+         System.out.println(LocalTime.now() + "UserDAO.connectUser(): Error: user not registered");
+         throw new DataBaseException("The user is not registered");
+      }
+
+      AuthToken token = new AuthToken();
+
+
+
       return null;
    }
    
    /**
-    * Check if a user is registered in the databse (registered, not connected).
+    * Check if a user is registered in the database (registered, not connected).
     * @param   user_name: the user to check.
     * @return  the user as a User object. Will be null if the user is not found/registered.
     */
@@ -102,6 +118,12 @@ public class UserDAO{
       return null;
    }
 
+   /**
+    * Return a user using a user_name.
+    * @param user_name: the user to fetch.
+    * @return
+    * @throws DataBaseException: Contains the message to be returned to the client in case of an error.
+    */
    public User getUser(String user_name) throws DataBaseException {
       User usr = null;
 
@@ -119,13 +141,18 @@ public class UserDAO{
          result = stmt.executeQuery();
 
          if(result.next()){
+            System.out.println(LocalTime.now() + " UserDAO.getUser(): User has been found");
+
             usr = new User(result.getString("user_name"),
-                           result.getString("person_id"),
                            result.getString("password"),
                            result.getString("email"),
                            result.getString("first_name"),
                            result.getString("last_name"),
-                           result.getString("gender"));
+                           result.getString("gender"),
+                           result.getString("person_id"));
+         }
+         if(usr != null){
+            System.out.println(LocalTime.now() + " UserDAO.getUser() : Fetched user: \"" + usr.getUserName() + "\"");
          }
          return usr;
 
@@ -139,6 +166,15 @@ public class UserDAO{
          throw new DataBaseException("Error while deleting data from users table");
       }
       finally {
+         if(result != null){
+            try{
+               stmt.close();
+            }
+            catch (Exception e){
+               System.out.println(LocalTime.now() + " UserDao.addUser(): ERROR couldn't close prepared statement, " + e.toString());
+               throw new DataBaseException("Couldn't add user");
+            }
+         }
          if(stmt != null){
             try{
                stmt.close();
@@ -190,6 +226,7 @@ public class UserDAO{
          }
       }
 
+      System.out.println(LocalTime.now() + " UserDao.deleteUser(): data in users table cleared");
       return true;
    }
 

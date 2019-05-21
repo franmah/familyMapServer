@@ -77,4 +77,8 @@ public class User{
                 Objects.equals(person_id, user.person_id);
     }
 
+    @Override
+    public String toString(){
+        return String.format(user_name + " " + person_id + " " + password + " " + email + " " + first_name + " " + last_name + " " + gender);
+    }
 }

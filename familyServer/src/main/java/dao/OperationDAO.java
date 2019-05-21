@@ -3,6 +3,7 @@ package dao;
 import java.sql.*;
 import java.io.*;
 import java.util.*;
+import java.time.LocalTime;
 
 /*
 once working:
@@ -69,7 +70,7 @@ public class OperationDAO{
 
             stmt = connection.createStatement();
             stmt.executeUpdate(query);
-            System.out.println("OperationDAO.createDataBase(): Tables have been created with success!");
+            System.out.println(LocalTime.now() + " OperationDAO.createDataBase(): Tables have been created with success!");
 
             // FIX IT:
             stmt.close();
@@ -77,7 +78,7 @@ public class OperationDAO{
 
         }
         catch(Exception e){
-            System.out.println("OperationDAO.createDataBase(): Error: " + e.toString());
+            System.out.println(LocalTime.now() + " OperationDAO.createDataBase(): Error: " + e.toString());
 
             File new_db = new File(DB_LOCATION);
             if(new_db.delete()){
@@ -100,7 +101,7 @@ public class OperationDAO{
 
         File file = new File(file_location);
         if(!file.exists()){
-            System.out.println("OperationDAO.createQueryFromFile(): Error: the sql file doesn't exist.");
+            System.out.println(LocalTime.now() + " OperationDAO.createQueryFromFile(): Error: the sql file doesn't exist.");
             System.out.println("file path: " + file_location);
             throw new DataBaseException("SQL file doesn't exist");
         }
@@ -116,7 +117,7 @@ public class OperationDAO{
             return createStatement.toString();
         }
         catch(Exception e){
-            System.out.println("OperationDAO.createQueryFromFile(): Error while reading the sql file: " + e.toString());
+            System.out.println(LocalTime.now() + " OperationDAO.createQueryFromFile(): Error while reading the sql file: " + e.toString());
             throw new DataBaseException("Error while reading the sql file");
         }
     }
@@ -133,27 +134,26 @@ public class OperationDAO{
         try{
 
             if(!db_file.exists()){
-                System.out.println("OperationDAO.openConnection(): WARNING: the data base file doesn't exit, creating file...");
+                System.out.println(LocalTime.now() + " OperationDAO.openConnection(): WARNING: the data base file doesn't exit, creating file...");
                 connection = createDataBase();
                 connection.setAutoCommit(false);
-                System.out.println("OperationDAO.openConnection(): connection successful.");
+                System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
                 return connection;
             }
 
             // Open and return connection
             Class.forName(DRIVER);
-            System.out.println("CURRENT: " + System.getProperty("user.dir"));
             connection = DriverManager.getConnection(DB_TYPE + DB_LOCATION);
             connection.setAutoCommit(false);
-            System.out.println("OperationDAO.openConnection(): connection successful.");
+            System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
             return connection;
         }
         //catch(DataBaseException message){
             //throw new DataBaseException(message.toString());
         //}
         catch(Exception e){
-            System.out.println("OperationDAO.openConnection(): Error: " + e);
-            throw new DataBaseException("Connection to the databse failed.");
+            System.out.println(LocalTime.now() + " OperationDAO.openConnection(): Error: " + e);
+            throw new DataBaseException("Connection to the database failed.");
         }
 
 
@@ -174,10 +174,10 @@ public class OperationDAO{
                     connection.rollback();
                 }
                 connection.close();
-                System.out.println("OperationDAO.closeConnection(): connection has been closed.");
+                System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed.");
             }
             catch(Exception e){
-                System.out.println("OperationDAO.closeConnection(): Error: " + e.toString());
+                System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): Error: " + e.toString());
                 throw new DataBaseException("The connection couldn't be closed.");
             }
         }
