@@ -137,7 +137,7 @@ public class OperationDAO{
                 System.out.println(LocalTime.now() + " OperationDAO.openConnection(): WARNING: the data base file doesn't exit, creating file...");
                 connection = createDataBase();
                 connection.setAutoCommit(false);
-                System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
+                //System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
                 return connection;
             }
 
@@ -145,7 +145,7 @@ public class OperationDAO{
             Class.forName(DRIVER);
             connection = DriverManager.getConnection(DB_TYPE + DB_LOCATION);
             connection.setAutoCommit(false);
-            System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
+            //System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
             return connection;
         }
         //catch(DataBaseException message){
@@ -174,7 +174,7 @@ public class OperationDAO{
                     connection.rollback();
                 }
                 connection.close();
-                System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed.");
+                //System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed.");
             }
             catch(Exception e){
                 System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): Error: " + e.toString());

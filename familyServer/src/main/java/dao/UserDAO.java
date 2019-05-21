@@ -24,13 +24,6 @@ public class UserDAO{
     */
    public boolean addUser(User user) throws DataBaseException {
 
-      // Check if user is registered.
-      User tmp_user = getUser(user.getUserName());
-      if(tmp_user != null){
-         System.out.println(LocalTime.now() + "UserDAO.addUser(): Error: user already in database");
-         return false;
-      }
-
       // Create update statement:
       String query = "INSERT INTO users VALUES(?,?,?,?,?,?,?);";
 
@@ -84,7 +77,6 @@ public class UserDAO{
       System.out.println(LocalTime.now() + " UserDAO.addUser(): User: \"" + user.getUserName() + "\" has been added");
       return true;
    }
-
 
    /**
     * Return a user using a user_name.
@@ -179,7 +171,6 @@ public class UserDAO{
 
       return null;
    } // NOT FINISHED: NEED AUTHTOKEN DAO TO BE IMPLEMENTED
-
 
    public boolean deleteUsers() throws  DataBaseException{
 
