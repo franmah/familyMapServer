@@ -1,6 +1,8 @@
 package models;
 
-/** 
+import java.util.Objects;
+
+/**
  * Person object. 
  * Each object is linked to a user.
  */
@@ -47,5 +49,30 @@ public class Person{
     public String getFatherId(){return father_id;}
     public String getMotherId(){return mother_id;}
     public String getSpouseId(){return spouse_id;}
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Person)) return false;
+        Person person = (Person) o;
+        return Objects.equals(person_id, person.person_id) &&
+                Objects.equals(user_name, person.user_name) &&
+                Objects.equals(first_name, person.first_name) &&
+                Objects.equals(last_name, person.last_name) &&
+                Objects.equals(getGender(), person.getGender()) &&
+                Objects.equals(father_id, person.father_id) &&
+                Objects.equals(mother_id, person.mother_id) &&
+                Objects.equals(spouse_id, person.spouse_id);
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder final_string = new StringBuilder(person_id + " " + user_name + " " + first_name + " " + last_name + " " + gender);
+
+        if(father_id != null) { final_string.append(" " + father_id); }
+        if(mother_id != null) { final_string.append(" " + mother_id); }
+        if(spouse_id != null) { final_string.append(" " + spouse_id); }
+
+        return final_string.toString();
+    }
 }

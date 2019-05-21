@@ -25,7 +25,7 @@ public class UserDAO{
    public boolean addUser(User user) throws DataBaseException {
 
       // Check if user is registered.
-      User tmp_user = isRegistered(user.getUserName());
+      User tmp_user = getUser(user.getUserName());
       if(tmp_user != null){
          System.out.println(LocalTime.now() + "UserDAO.addUser(): Error: user already in database");
          return false;
@@ -84,39 +84,7 @@ public class UserDAO{
       System.out.println(LocalTime.now() + " UserDAO.addUser(): User: \"" + user.getUserName() + "\" has been added");
       return true;
    }
-   
-   /**
-    * Create a token and use it to connect the user.
-    * @param   user_name: the user to connect.
-    * @param   password: the user's password.
-    * @return  the user as a User object. Will return null if the user is not connected.
-    */
-   public User connectUser(String user_name, String password) throws DataBaseException {
-      User user = null;
 
-      // Check if user is registered ?
-      user = isRegistered(user_name);
-      if(user == null){
-         System.out.println(LocalTime.now() + "UserDAO.connectUser(): Error: user not registered");
-         throw new DataBaseException("The user is not registered");
-      }
-
-      AuthToken token = new AuthToken();
-
-
-
-      return null;
-   }
-   
-   /**
-    * Check if a user is registered in the database (registered, not connected).
-    * @param   user_name: the user to check.
-    * @return  the user as a User object. Will be null if the user is not found/registered.
-    */
-   public User isRegistered(String user_name) throws DataBaseException {
-      
-      return null;
-   }
 
    /**
     * Return a user using a user_name.
@@ -144,12 +112,12 @@ public class UserDAO{
             System.out.println(LocalTime.now() + " UserDAO.getUser(): User has been found");
 
             usr = new User(result.getString("user_name"),
-                           result.getString("password"),
-                           result.getString("email"),
-                           result.getString("first_name"),
-                           result.getString("last_name"),
-                           result.getString("gender"),
-                           result.getString("person_id"));
+                    result.getString("password"),
+                    result.getString("email"),
+                    result.getString("first_name"),
+                    result.getString("last_name"),
+                    result.getString("gender"),
+                    result.getString("person_id"));
          }
          if(usr != null){
             System.out.println(LocalTime.now() + " UserDAO.getUser() : Fetched user: \"" + usr.getUserName() + "\"");
@@ -158,11 +126,11 @@ public class UserDAO{
 
       }
       catch(DataBaseException message){
-         System.out.println(LocalTime.now() + " UserDao.deleteUsers(): " + message.toString());
+         System.out.println(LocalTime.now() + " UserDao.getUsers(): " + message.toString());
          throw new DataBaseException(message.toString());
       }
       catch(Exception e){
-         System.out.println(LocalTime.now() + " UserDAO.deleteUsers(): ERROR while deleting data from users: " + e.toString());
+         System.out.println(LocalTime.now() + " UserDAO.getUsers(): ERROR while deleting data from users: " + e.toString());
          throw new DataBaseException("Error while deleting data from users table");
       }
       finally {
@@ -171,8 +139,8 @@ public class UserDAO{
                stmt.close();
             }
             catch (Exception e){
-               System.out.println(LocalTime.now() + " UserDao.addUser(): ERROR couldn't close prepared statement, " + e.toString());
-               throw new DataBaseException("Couldn't add user");
+               System.out.println(LocalTime.now() + " UserDao.getUser(): ERROR couldn't close prepared statement, " + e.toString());
+               throw new DataBaseException("Couldn't get user");
             }
          }
          if(stmt != null){
@@ -180,8 +148,8 @@ public class UserDAO{
                stmt.close();
             }
             catch (Exception e){
-               System.out.println(LocalTime.now() + " UserDao.addUser(): ERROR couldn't close prepared statement, " + e.toString());
-               throw new DataBaseException("Couldn't add user");
+               System.out.println(LocalTime.now() + " UserDao.getUser(): ERROR couldn't close prepared statement, " + e.toString());
+               throw new DataBaseException("Couldn't get user");
             }
          }
          if(connection != null){
@@ -189,6 +157,29 @@ public class UserDAO{
          }
       }
    }
+
+   /**
+    * Create a token and use it to connect the user.
+    * @param   user_name: the user to connect.
+    * @param   password: the user's password.
+    * @return  the user as a User object. Will return null if the user is not connected.
+    */
+   public User connectUser(String user_name, String password) throws DataBaseException {
+      User user = null;
+
+      // Check if user is registered
+      user = getUser(user_name);
+      if(user == null){
+         System.out.println(LocalTime.now() + "UserDAO.connectUser(): Error: user not registered");
+         throw new DataBaseException("The user is not registered");
+      }
+
+
+
+
+      return null;
+   } // NOT FINISHED: NEED AUTHTOKEN DAO TO BE IMPLEMENTED
+
 
    public boolean deleteUsers() throws  DataBaseException{
 
@@ -217,7 +208,7 @@ public class UserDAO{
                stmt.close();
             }
             catch (Exception e){
-               System.out.println(LocalTime.now() + " UserDao.addUser(): ERROR couldn't close prepared statement, " + e.toString());
+               System.out.println(LocalTime.now() + " UserDao.deleteUser(): ERROR couldn't close prepared statement, " + e.toString());
                throw new DataBaseException("Couldn't add user");
             }
          }
