@@ -21,17 +21,6 @@ CREATE TABLE users
     last_name   TEXT   NOT NULL,
     gender  CHAR(1)  NOT NULL
 
-    /* DOESN'T WORK: */
-    /*CHECK(gender = "f" OR "m")*/
-);
-
-CREATE TABLE user_person
-(
-    user_name TEXT  NOT NULL,
-    person_id   TEXT    NOT NULL,
-
-    FOREIGN KEY (user_name) REFERENCES users (user_name)
-    FOREIGN KEY (person_id) REFERENCES persons (person_id)
 );
 
 CREATE TABLE events
@@ -46,8 +35,6 @@ CREATE TABLE events
     event_type    TEXT    NOT NULL,
     year    INT NOT NULL,
     
-    FOREIGN KEY (person_id) REFERENCES persons (person_id)
-    FOREIGN KEY (user_name) REFERENCES users (user_name)
 );
 
 CREATE TABLE authtokens
@@ -55,5 +42,4 @@ CREATE TABLE authtokens
     token   TEXT    NOT NULL    PRIMARY KEY,
     user_name   TEXT    NOT NULL,
     
-    FOREIGN KEY (user_name) REFERENCES Users (user_name)
 );

@@ -1,6 +1,9 @@
 package dao;
 
 import models.User;
+import java.time.LocalTime;
+import java.sql.*;
+
 /**
  * Perform database operation for users
  */ 
@@ -14,15 +17,48 @@ public class UserDAO{
    }
 
    /**
-    * Add a user to the databse
-    * Create a String with the query and pass it to the select method in OperationDAO
+    * Add a user to the database. Create a String with the query and pass it to the select method in OperationDAO
     * 
     * @param    user to add
     * @return   False if the username is already used.
     */
    public static boolean addUser(User user) throws DataBaseException {
-       
-       return false;
+      // Check if user is registered.
+      User tmp_user = isRegistered(user.getUserName());
+      if(tmp_user != null){
+         System.out.println(LocalTime.now() + "UserDAO.addUser(): Error: user already in database");
+         return false;
+      }
+
+      // Create update statement:
+
+      String query = "INSERT INTO users VALUES(?,?,?,?,?,?,?);";
+
+      try(Connection connection = OperationDAO.openConnection();
+         PreparedStatement stmt = connection.prepareStatement(query))
+      {
+         stmt.setString(1, user.getUserName());
+         stmt.setString(2, user.getPersonId());
+         stmt.setString(3, user.getPassword());
+         stmt.setString(4, user.getEmail());
+         stmt.setString(5, user.getFirstName());
+         stmt.setString(6, user.getLastName());
+         stmt.setString(7, user.getGender());
+
+         stmt.executeUpdate();
+
+      }
+      catch(DataBaseException message){
+         System.out.println(LocalTime.now() + "  UserDao.addUser(): ERROR: " + message.toString());
+         throw new DataBaseException(message.toString());
+      }
+      catch(Exception e){
+         System.out.println(LocalTime.now() + "UserDao.addUser(): " + e.toString());
+         e.getStackTrace();
+         throw new DataBaseException("Something went wrong while trying to add the user");
+      }
+
+      return true;
    }
    
    /**

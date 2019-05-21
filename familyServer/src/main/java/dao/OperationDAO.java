@@ -24,7 +24,7 @@ once working:
 
     ** in createDataBase() fix the close issue for stmt and connection, they should be closed no matter what
 
-
+    ** If the creation of the databse fail, the familyDB.db should be deleted.
     */
 
 
@@ -39,7 +39,6 @@ public class OperationDAO{
     private static final String DRIVER = "org.sqlite.JDBC";
     private static final String DB_TYPE = "jdbc:sqlite:";
     private static final String DB_LOCATION = String.format(CURR_DIR + File.separator + ".." + File.separator + "database" + File.separator + "familyServerDB.db");
-    private static final String CREATE_TABLES_QUERY = CURR_DIR + File.separator +".." + File.separator + "SQLcode" + File.separator + "initializeDataBase.sql.txt";
 
     public OperationDAO(){}
 
@@ -48,7 +47,11 @@ public class OperationDAO{
      * Create the database and execute CREATE commands.
      * Use the createQueryFromFile method to create a query as a String from initializeDataBase.sql.txt
      */
-    private static Connection createDataBase() throws DataBaseException{
+    public static Connection createDataBase() throws DataBaseException{
+
+
+        final String CREATE_TABLES_QUERY = CURR_DIR + File.separator +".." + File.separator + "SQLcode" + File.separator + "initializeDataBase.sql.txt";
+
         Connection connection = null;
         Statement stmt = null;
         try{
@@ -59,6 +62,7 @@ public class OperationDAO{
 
             // Create TABLES from sql file.
             String query = createQueryFromFile(CREATE_TABLES_QUERY);
+            //System.out.println(query);
 
             stmt = connection.createStatement();
             stmt.executeUpdate(query);
@@ -70,7 +74,16 @@ public class OperationDAO{
 
         }
         catch(Exception e){
-            System.out.println("OperationDAO.createDataBase(): Error: " + e);
+            System.out.println("OperationDAO.createDataBase(): Error: " + e.toString());
+
+            File new_db = new File(DB_LOCATION);
+            if(new_db.delete()){
+                System.out.println("The newly created database file has been deleted with success.");
+            }
+            else{
+                System.out.println("The newly created database could not be deleted.");
+            }
+
             throw new DataBaseException("Database couldn't be created");
         }
 
@@ -85,6 +98,7 @@ public class OperationDAO{
         File file = new File(file_location);
         if(!file.exists()){
             System.out.println("OperationDAO.createQueryFromFile(): Error: the sql file doesn't exist.");
+            System.out.println("file path: " + file_location);
             throw new DataBaseException("SQL file doesn't exist");
         }
 
@@ -106,37 +120,38 @@ public class OperationDAO{
 
     /**
      * Open a connection to the database.
-     * @param   connection: connection used by the two public methods ExecuteUpdate and executeQuery.
+     * @return   connection: connection used by the two public methods ExecuteUpdate and executeQuery.
      */
-    private static void openConnection(Connection connection) throws DataBaseException{
-
+    public static Connection openConnection() throws DataBaseException{
+        Connection connection = null;
         //Test if db exists:
         File db_file = new File(DB_LOCATION);
 
         try{
-
+            /*
             if(!db_file.exists()){
                 System.out.println("OperationDAO.openConnection(): WARNING: the data base file doesn't exit, creating file...");
                 connection = createDataBase();
                 connection.setAutoCommit(false);
                 System.out.println("OperationDAO.openConnection(): connection successful.");
-                return;
+                return connection;
             }
-
+            */
             // Open and return connection
 
             Class.forName(DRIVER);
+            System.out.println("CURRENT: " + System.getProperty("user.dir"));
             connection = DriverManager.getConnection(DB_TYPE + DB_LOCATION);
             connection.setAutoCommit(false);
             System.out.println("OperationDAO.openConnection(): connection successful.");
-
+            return connection;
         }
-        catch(DataBaseException message){
-            throw new DataBaseException(message.toString());
-        }
+        //catch(DataBaseException message){
+            //throw new DataBaseException(message.toString());
+        //}
         catch(Exception e){
             System.out.println("OperationDAO.openConnection(): Error: " + e);
-            throw new DataBaseException("Database couldn't be created.");
+            throw new DataBaseException("Connection to the databse failed.");
         }
 
 
@@ -146,7 +161,7 @@ public class OperationDAO{
      * Close a connection to a database.
      * @param   connection: the connection to close.
      */
-    private static void closeConnection(Connection connection) throws DataBaseException{
+    public static void closeConnection(Connection connection) throws DataBaseException{
 
         if(connection != null){
             try{
@@ -163,19 +178,21 @@ public class OperationDAO{
 
     /**
      * Execute any type query that require an "executeUpdate()" command.
-     * @param   query: the query to execute.
+     * @param   stmt: the query to execute.
      */
-    public static void executeUpdate(String query) throws DataBaseException{
+    public static void executeUpdate(PreparedStatement stmt) throws DataBaseException{
         Connection connection = null;
 
         try{
-            openConnection(connection);
+            connection = openConnection();
+            if(connection == null){
+                System.out.println("connection came back null");
+            }
 
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate(query);
-            stmt.close();
+            stmt.executeUpdate();
 
             connection.commit();
+            System.out.println("OperationDAO.executeUpdate(): SUCCESS: the query has been commited!");
         }
         catch(DataBaseException message){
             throw new DataBaseException(message.toString());
@@ -188,35 +205,6 @@ public class OperationDAO{
             closeConnection(connection);
         }
 
-    }
-
-    /**
-     * Execute a SELECT type query on the databse.
-     * @param   query: the query to execute.
-     * @return   ResultSet from the SELECT.
-     */
-    public static ResultSet executeQuery(String query) throws DataBaseException{
-        Connection connection = null;
-
-        try{
-            openConnection(connection);
-
-            Statement stmt = connection.createStatement();
-            ResultSet result = stmt.executeQuery(query);
-            stmt.close();
-
-            return result;
-        }
-        catch(DataBaseException message){
-            throw new DataBaseException(message.toString());
-        }
-        catch(Exception e){
-            System.out.println("OperationDAO.executeUpdate(): ERROR: couldn't execute select: " + e.toString());
-            throw new DataBaseException("Couldn't execute select statement");
-        }
-        finally{
-            closeConnection(connection);
-        }
     }
 
 

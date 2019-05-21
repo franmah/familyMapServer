@@ -10,15 +10,13 @@ import models.Event;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by westenm on 2/5/19.
- */
 
-//We will use this to test that our insert function is working and failing in the right ways
 public class EventDAOTest {
 
     @Before
     public void setUp() throws Exception {
+        Event evt = new Event("birth_francois", "fmahieu", "francois_id",
+                (float)45.7640, (float) 4.8357, "France", "Lyon", "birth", 1993);
     }
 
     @After
