@@ -33,13 +33,13 @@ CREATE TABLE events
     country    REAL    NOT NULL,
     city    TEXT    NOT NULL,
     event_type    TEXT    NOT NULL,
-    year    INT NOT NULL,
+    year    INT NOT NULL
     
 );
 
 CREATE TABLE authtokens
 (
     token   TEXT    NOT NULL    PRIMARY KEY,
-    user_name   TEXT    NOT NULL,
+    user_name   TEXT    NOT NULL
     
 );
