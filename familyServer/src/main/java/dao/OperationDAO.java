@@ -5,29 +5,7 @@ import java.io.*;
 import java.util.*;
 import java.time.LocalTime;
 
-/*
-once working:
-    take care of DataBaseException.
-    add a catch that will return any DataBaseException as thrown
-
-    exemple for creating databse:
-
-    try{
-        createdb
-    }
-    catch(DataBaseException message){
-        throw new DataBaseException(message);
-    }
-    catch(Exception e){
-        throw new DataBaseException("something went wrong while create db")
-    }
-
-
-    ** in createDataBase() fix the close issue for stmt and connection, they should be closed no matter what
-
-    ** If the creation of the database fail, the familyDB.db should be deleted.
-    */
-
+import models.AuthToken;
 
 
 /**
@@ -43,20 +21,46 @@ public class OperationDAO{
     //private final String DB_LOCATION = String.format(CURR_DIR + File.separator + ".." + File.separator + "database" + File.separator + "familyServerDB.db");
     private final String DB_LOCATION = ("C:\\Users\\Francois\\AndroidStudioProjects\\fma\\familyServer\\src\\main\\java\\database\\familyServerDB.db");
 
+    Connection connection = null;
+    UserDAO user_dao = null;
+    PersonDAO person_dao = null;
+    EventDAO event_dao = null;
+    AuthTokenDAO autToken_dao = null;
 
-    public OperationDAO(){}
+    public OperationDAO(){
+        try {
+            this.openConnection();
+            this.user_dao = new UserDAO(connection);
+            this.person_dao = new PersonDAO(connection);
+            this.event_dao = new EventDAO(connection);
+            this.autToken_dao = new AuthTokenDAO(connection);
+        }
+        catch (DataBaseException message){
+                throw new DataBaseException(message.toString());
+        }
+        catch (Exception e){
+            System.out.println(LocalTime.now() + " OperationDAO.constructor: error while creating OperationDAO object " + e.toString());
+            throw new DataBaseException("Internal error: Unable to connect to database");
+        }
+    }
 
+    public UserDAO getUser_dao() { return user_dao; }
+
+    public PersonDAO getPerson_dao() { return person_dao; }
+
+    public EventDAO getEvent_dao() { return event_dao; }
+
+    public AuthTokenDAO getAutToken_dao() { return autToken_dao; }
 
     /**
      * Create the database and execute CREATE commands.
      * Use the createQueryFromFile method to create a query as a String from initializeDataBase.sql.txt
      */
-    public Connection createDataBase() throws DataBaseException{
+    public void createDataBase() throws DataBaseException{
 
         final String CREATE_TABLES_QUERY = ("C:\\Users\\Francois\\AndroidStudioProjects\\fma\\familyServer\\src\\main\\java\\SQLcode\\InitializeDataBase.sql.txt");
         //final String CREATE_TABLES_QUERY = CURR_DIR + File.separator +".." + File.separator + "SQLcode" + File.separator + "initializeDataBase.sql.txt";
 
-        Connection connection = null;
         Statement stmt = null;
         try{
 
@@ -74,7 +78,6 @@ public class OperationDAO{
 
             // FIX IT:
             stmt.close();
-            return connection;
 
         }
         catch(Exception e){
@@ -126,8 +129,7 @@ public class OperationDAO{
      * Open a connection to the database.
      * @return   connection: connection used by the two public methods ExecuteUpdate and executeQuery.
      */
-    public Connection openConnection() throws DataBaseException{
-        Connection connection = null;
+    public void openConnection() throws DataBaseException{
         //Test if db exists:
         File db_file = new File(DB_LOCATION);
 
@@ -135,18 +137,16 @@ public class OperationDAO{
 
             if(!db_file.exists()){
                 System.out.println(LocalTime.now() + " OperationDAO.openConnection(): WARNING: the data base file doesn't exit, creating file...");
-                connection = createDataBase();
+                this.createDataBase();
                 connection.setAutoCommit(false);
                 //System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
-                return connection;
             }
 
             // Open and return connection
             Class.forName(DRIVER);
             connection = DriverManager.getConnection(DB_TYPE + DB_LOCATION);
             connection.setAutoCommit(false);
-            //System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
-            return connection;
+            System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
         }
         //catch(DataBaseException message){
             //throw new DataBaseException(message.toString());
@@ -161,9 +161,9 @@ public class OperationDAO{
 
     /**
      * Close a connection to a database.
-     * @param   connection: the connection to close.
+     * @param   commit: whether to commit or not.
      */
-    public void closeConnection(Connection connection, boolean commit) throws DataBaseException{
+    public void commitAndCloseConnection(boolean commit) throws DataBaseException{
 
         if(connection != null){
             try{
@@ -173,8 +173,14 @@ public class OperationDAO{
                 else{
                     connection.rollback();
                 }
+
                 connection.close();
-                //System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed.");
+                if(commit) {
+                    System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed and changes were committed");
+                }
+                else{
+                    System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed and changes were not committed");
+                }
             }
             catch(Exception e){
                 System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): Error: " + e.toString());
@@ -183,10 +189,7 @@ public class OperationDAO{
         }
     }
 
-    public boolean clearDataBase(){
 
-        return true;
-    }
 
 ////////////////////////////////////////////////
 }

@@ -11,11 +11,12 @@ import java.util.List;
  * Add and fetch Persons.
  */
 public class PersonDAO{
-    private OperationDAO db;
+
+    private Connection connection = null;
     
-    public PersonDAO(){
-        db = new OperationDAO();
-    }
+    public PersonDAO(){}
+
+    public PersonDAO(Connection connection){ this.connection = connection; }
     
     /**
      * Create the query needed to add a person into the database.
@@ -35,14 +36,10 @@ public class PersonDAO{
         // Create update statement:
         String query = "INSERT INTO persons VALUES(?,?,?,?,?,?,?,?);";
 
-        boolean commit = false;
-
-        Connection connection = null;
         PreparedStatement stmt = null;
 
         try{
 
-            connection = db.openConnection();
             stmt = connection.prepareStatement(query);
 
             stmt.setString(1, person.getPersonId());
@@ -55,7 +52,9 @@ public class PersonDAO{
             stmt.setString(8, person.getSpouseId());
 
             stmt.executeUpdate();
-            commit = true;
+
+            System.out.println(LocalTime.now() + " personDAO.addPerson(): person: \"" + person.getPersonId() + "\" has been added");
+            return true;
 
         }
         catch(DataBaseException message){
@@ -74,16 +73,11 @@ public class PersonDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " personDao.addPerson(): ERROR couldn't close prepared statement, " + e.toString());
-                    throw new DataBaseException("Couldn't add person");
+                    throw new DataBaseException("Internal error: unable to add person");
                 }
-            }
-            if(connection != null){
-                db.closeConnection(connection, commit);
             }
         }
 
-        System.out.println(LocalTime.now() + " personDAO.addPerson(): person: \"" + person.getPersonId() + "\" has been added");
-        return true;
     }
     
     /**
@@ -96,13 +90,11 @@ public class PersonDAO{
         Person person = null;
 
         ResultSet result = null;
-        Connection connection = null;
         PreparedStatement stmt = null;
 
         String query = "SELECT * FROM persons WHERE person_id = ?";
 
         try{
-            connection = db.openConnection();
             stmt = connection.prepareStatement(query);
             stmt.setString(1, person_id);
 
@@ -112,10 +104,10 @@ public class PersonDAO{
                 System.out.println(LocalTime.now() + " personDAO.getPerson(): person \"" + person_id + "\" has been found.");
 
                 person = new Person(result.getString("person_id"),
-                        result.getString("person_id"),
-                        result.getString("first_name"),
-                        result.getString("last_name"),
-                        result.getString("gender"));
+                                    result.getString("person_id"),
+                                    result.getString("first_name"),
+                                    result.getString("last_name"),
+                                    result.getString("gender"));
 
                 person.setFatherId(result.getString("father_id"));
                 person.setMotherId(result.getString("mother_id"));
@@ -157,9 +149,6 @@ public class PersonDAO{
                     throw new DataBaseException("Couldn't get person");
                 }
             }
-            if(connection != null){
-                db.closeConnection(connection, false);
-            }
         }
     }
     
@@ -175,13 +164,11 @@ public class PersonDAO{
         Person person = null;
 
         ResultSet result = null;
-        Connection connection = null;
         PreparedStatement stmt = null;
 
         String query = "SELECT * FROM persons;";
 
         try{
-            connection = db.openConnection();
             stmt = connection.prepareStatement(query);
             result = stmt.executeQuery();
 
@@ -231,9 +218,6 @@ public class PersonDAO{
                     throw new DataBaseException("Couldn't retrieve people.");
                 }
             }
-            if(connection != null){
-                db.closeConnection(connection, false);
-            }
         }
     }
 
@@ -242,17 +226,16 @@ public class PersonDAO{
      */
     public boolean deletePersons() throws  DataBaseException{
 
-
-        Connection connection = null;
         PreparedStatement stmt = null;
-        boolean commit = false;
 
         try{
-            connection = db.openConnection();
             String query = "DELETE FROM persons;";
             stmt = connection.prepareStatement(query);
             stmt.executeUpdate();
-            commit = true;
+
+
+            System.out.println(LocalTime.now() + " PersonDao.deletePerson(): data in persons table cleared");
+            return true;
         }
         catch(DataBaseException message){
             System.out.println(LocalTime.now() + " PersonDao.deletePersons(): " + message.toString());
@@ -272,13 +255,8 @@ public class PersonDAO{
                     throw new DataBaseException("Couldn't add person");
                 }
             }
-            if(connection != null){
-                db.closeConnection(connection, commit);
-            }
         }
 
-        System.out.println(LocalTime.now() + " PersonDao.delete{erson(): data in persons table cleared");
-        return true;
     }
 
 }

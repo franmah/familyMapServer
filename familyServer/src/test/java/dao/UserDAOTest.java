@@ -1,27 +1,35 @@
 package dao;
 
 import org.junit.*;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
+
+import java.sql.Connection;
+import java.time.LocalTime;
+import java.util.Locale;
+
 import static org.junit.Assert.*;
 
 import models.User;
 
 
 public class UserDAOTest {
+    private OperationDAO db = null;
 
     @Before
     public void setUp() throws Exception {
+        db = new OperationDAO();
     }
 
     @After
     public void tearDown() throws Exception {
-        UserDAO udao = new UserDAO();
-        udao.deleteUsers();
+        db.commitAndCloseConnection(false);
+        db = null;
     }
+
 
     @Test
     public void insertPass() throws Exception {
-        UserDAO udao = new UserDAO();
-        udao.deleteUsers();
+        UserDAO udao = db.getUser_dao();
 
         User usr = new User("test", "password", "test@test.com", "this",
                 "test", "f", "test_id");
@@ -31,9 +39,7 @@ public class UserDAOTest {
 
     @Test
     public void insertFail() throws Exception {
-        UserDAO udao = new UserDAO();
-        udao.deleteUsers();
-
+        UserDAO udao = db.getUser_dao();
 
         User usr = new User("test", "password", "test@test.com", "this",
                 "test", "f", "test_id");
@@ -53,7 +59,7 @@ public class UserDAOTest {
 
     @Test
     public void deletePass() throws  Exception{
-        UserDAO udao = new UserDAO();
+        UserDAO udao = db.getUser_dao();
 
         boolean success = false;
         try {
@@ -65,14 +71,11 @@ public class UserDAOTest {
 
         assertTrue(success);
 
-
     }
 
     @Test
     public void getUserPass() throws  Exception{
-        UserDAO udao = new UserDAO();
-
-        udao.deleteUsers();
+        UserDAO udao = db.getUser_dao();
 
         User usr = new User("test", "password", "test@test.com", "this",
                 "test", "f", "test_id");
@@ -89,7 +92,7 @@ public class UserDAOTest {
 
     @Test
     public void getUserFail() throws  Exception{
-        UserDAO udao = new UserDAO();
+        UserDAO udao = db.getUser_dao();
 
         udao.deleteUsers();
 
@@ -100,7 +103,7 @@ public class UserDAOTest {
 
     @Test
     public void connectUser(){
-        UserDAO udao = new UserDAO();
+        UserDAO udao = db.getUser_dao();
 
         User user = new User("test", "password", "test@test.com", "this",
                 "test", "f", "test_id");

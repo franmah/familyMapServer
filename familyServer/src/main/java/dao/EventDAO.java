@@ -11,10 +11,14 @@ import java.util.ArrayList;
  * Add and fetch events.
  */
 public class EventDAO{
-    private OperationDAO db = null;
+    Connection connection = null;
 
-    public EventDAO(){db = new OperationDAO();}
-    
+    public EventDAO(){}
+
+    public EventDAO(Connection connection){ this.connection = connection; }
+
+    public Connection getConnection() { return connection; }
+
     /**
      * Create a String with the query to add an event.
      * Then call the Insert method in OperationDAO.
@@ -48,13 +52,11 @@ public class EventDAO{
         Event event = null;
 
         ResultSet result = null;
-        Connection connection = null;
         PreparedStatement stmt = null;
 
         String query = "SELECT * FROM users;";
 
         try{
-            connection = db.openConnection();
             stmt = connection.prepareStatement(query);
             result = stmt.executeQuery();
 
@@ -103,9 +105,6 @@ public class EventDAO{
                     System.out.println(LocalTime.now() + " eventDao.getEventAll(): ERROR couldn't close prepared statement, " + e.toString());
                     throw new DataBaseException("Unable to retrieve events.");
                 }
-            }
-            if(connection != null){
-                db.closeConnection(connection, false);
             }
         }
     }

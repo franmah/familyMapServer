@@ -10,15 +10,12 @@ import java.sql.*;
  */ 
 public class UserDAO{
 
-   private OperationDAO db = null;
-   private Connection _connection = null;
+   private Connection connection = null;
 
-   public UserDAO(){
-      db = new OperationDAO();
-   }
+   public UserDAO(){}
 
    public UserDAO(Connection connection){
-      this._connection = connection;
+      this.connection = connection;
    }
 
    /**
@@ -34,12 +31,9 @@ public class UserDAO{
 
       boolean commit = false;
 
-      Connection connection = null;
       PreparedStatement stmt = null;
 
       try{
-
-         connection = db.openConnection();
          stmt = connection.prepareStatement(query);
 
          stmt.setString(1, user.getUserName());
@@ -52,7 +46,6 @@ public class UserDAO{
 
 
          stmt.executeUpdate();
-         commit = true;
 
       }
       catch(DataBaseException message){
@@ -74,9 +67,6 @@ public class UserDAO{
                throw new DataBaseException("Couldn't add user");
             }
          }
-         if(connection != null){
-            db.closeConnection(connection, commit);
-         }
       }
 
       System.out.println(LocalTime.now() + " UserDAO.addUser(): User: \"" + user.getUserName() + "\" has been added");
@@ -93,13 +83,11 @@ public class UserDAO{
       User usr = null;
 
       ResultSet result = null;
-      Connection connection = null;
       PreparedStatement stmt = null;
 
       String query = "SELECT * FROM users WHERE user_name = ?";
 
       try{
-         connection = db.openConnection();
          stmt = connection.prepareStatement(query);
          stmt.setString(1, user_name);
 
@@ -149,17 +137,15 @@ public class UserDAO{
                throw new DataBaseException("Couldn't get user");
             }
          }
-         if(connection != null){
-            db.closeConnection(connection, false);
-         }
       }
    }
 
    /**
-    * Create a token and use it to connect the user. If the user can't be logged in an error will be thrown.
+    * Create a token and use it to connect the user. If the user can't be logged in an error will be thrown,
+    * Check if the user is registered and if the password is right.
     * @param   user_name: the user to connect.
     * @param   password: the user's password.
-    * @return  unique string token.
+    * @return  unique string token. If String is null then user was not registered or the password was wrong.
     */
    public String connectUser(String user_name, String password) throws DataBaseException {
       User user = null;
@@ -181,7 +167,7 @@ public class UserDAO{
 
          AuthToken token = new AuthToken(user_name);
 
-         AuthTokenDAO atdao = new AuthTokenDAO();
+         AuthTokenDAO atdao = new AuthTokenDAO(connection);
          if(!atdao.addToken(token)){
             return  null;
          }
@@ -201,16 +187,12 @@ public class UserDAO{
 
    public boolean deleteUsers() throws  DataBaseException{
 
-      Connection connection = null;
       PreparedStatement stmt = null;
-      boolean commit = false;
 
       try{
-         connection = db.openConnection();
          String query = "DELETE FROM users;";
          stmt = connection.prepareStatement(query);
          stmt.executeUpdate();
-         commit = true;
       }
       catch(DataBaseException message){
          System.out.println(LocalTime.now() + " UserDao.deleteUsers(): " + message.toString());
@@ -229,9 +211,6 @@ public class UserDAO{
                System.out.println(LocalTime.now() + " UserDao.deleteUser(): ERROR couldn't close prepared statement, " + e.toString());
                throw new DataBaseException("Couldn't add user");
             }
-         }
-         if(connection != null){
-            db.closeConnection(connection, commit);
          }
       }
 
