@@ -185,9 +185,6 @@ public class PersonDAO{
             stmt = connection.prepareStatement(query);
             result = stmt.executeQuery();
 
-            // Get number of rows returned (for array of Person)
-            int row_count = 0;
-
             // Fill array of Person
             while(result.next()){
 

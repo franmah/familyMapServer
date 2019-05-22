@@ -11,9 +11,14 @@ import java.sql.*;
 public class UserDAO{
 
    private OperationDAO db = null;
+   private Connection _connection = null;
 
    public UserDAO(){
       db = new OperationDAO();
+   }
+
+   public UserDAO(Connection connection){
+      this._connection = connection;
    }
 
    /**
@@ -151,26 +156,48 @@ public class UserDAO{
    }
 
    /**
-    * Create a token and use it to connect the user.
+    * Create a token and use it to connect the user. If the user can't be logged in an error will be thrown.
     * @param   user_name: the user to connect.
     * @param   password: the user's password.
-    * @return  the user as a User object. Will return null if the user is not connected.
+    * @return  unique string token.
     */
-   public User connectUser(String user_name, String password) throws DataBaseException {
+   public String connectUser(String user_name, String password) throws DataBaseException {
       User user = null;
 
-      // Check if user is registered
-      user = getUser(user_name);
-      if(user == null){
-         System.out.println(LocalTime.now() + "UserDAO.connectUser(): Error: user not registered");
-         throw new DataBaseException("The user is not registered");
+      try {
+
+         // Check if user is registered.
+         user = getUser(user_name);
+         if (user == null) {
+            System.out.println(LocalTime.now() + "UserDAO.connectUser(): Error: user not registered");
+            return null;
+         }
+
+         // Check if password is right.
+         if(!user.getPassword().equals(password)){
+            System.out.println(LocalTime.now() + "UserDAO.connectUser(): wrong password");
+            return null;
+         }
+
+         AuthToken token = new AuthToken(user_name);
+
+         AuthTokenDAO atdao = new AuthTokenDAO();
+         if(!atdao.addToken(token)){
+            return  null;
+         }
+         else{
+            return token.getToken();
+         }
       }
+      catch(DataBaseException message){
+         throw new DataBaseException(message.toString());
+      }
+      catch (Exception e){
+         System.out.println(LocalTime.now() + " UserDAO.connectUser(): ERROR: unable to connect user: " + e.toString());
+         throw new DataBaseException("Unable to connect user");
+      }
+   }
 
-
-
-
-      return null;
-   } // NOT FINISHED: NEED AUTHTOKEN DAO TO BE IMPLEMENTED
 
    public boolean deleteUsers() throws  DataBaseException{
 
