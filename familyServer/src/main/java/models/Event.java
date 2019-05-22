@@ -1,5 +1,7 @@
 package models;
 
+import java.util.Objects;
+
 /**
  * Holds info for event objects.
  */
@@ -14,10 +16,9 @@ public class Event{
     private String city = null;
     private String type = null;
     private int year = 0;
-    
-    
+
     public Event(){}
-    
+
     /**
      * Create an Event with given info
      */
@@ -29,6 +30,7 @@ public class Event{
             this.latitude = latitude;
             this.longitude = longitude;
             this.country = country;
+            this.city = city;
             this.type = type;
             this.year = year;
         }
@@ -42,4 +44,25 @@ public class Event{
     public String getCity(){return city;}
     public String getType(){return type;}
     public int getYear(){return year;}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Event)) return false;
+        Event event = (Event) o;
+        return Float.compare(event.getLatitude(), getLatitude()) == 0 &&
+                Float.compare(event.getLongitude(), getLongitude()) == 0 &&
+                getYear() == event.getYear() &&
+                Objects.equals(event_id, event.event_id) &&
+                Objects.equals(user_name, event.user_name) &&
+                Objects.equals(person_id, event.person_id) &&
+                Objects.equals(getCountry(), event.getCountry()) &&
+                Objects.equals(getCity(), event.getCity()) &&
+                Objects.equals(getType(), event.getType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(event_id, user_name, person_id, getLatitude(), getLongitude(), getCountry(), getCity(), getType(), getYear());
+    }
 }

@@ -91,7 +91,6 @@ public class AuthTokenDAO{
         // Create update statement:
         String query = "INSERT INTO authtokens VALUES(?,?);";
 
-        Connection connection = null;
         PreparedStatement stmt = null;
 
         try{

@@ -7,18 +7,21 @@ import models.Person;
 
 
 public class PersonDAOTest {
-
+    private OperationDAO db= null;
     @Before
     public void setUp() throws Exception {
+        db = new OperationDAO();
     }
 
     @After
     public void tearDown() throws Exception {
+        db.commitAndCloseConnection(false);
+        db = null;
     }
 
     @Test
     public void deletePass() throws Exception{
-        PersonDAO pdao = new PersonDAO();
+        PersonDAO pdao = db.getPerson_dao();
         boolean success = false;
 
         try {
@@ -33,8 +36,7 @@ public class PersonDAOTest {
 
     @Test
     public void insertPass() throws Exception {
-        PersonDAO pdao = new PersonDAO();
-        pdao.deletePersons();
+        PersonDAO pdao = db.getPerson_dao();
         Person person = new Person("test", "test", "this", "test", "m");
 
         // insert without optional members (father_id...)
@@ -69,8 +71,7 @@ public class PersonDAOTest {
 
     @Test
     public void insertFail() throws Exception {
-        PersonDAO pdao = new PersonDAO();
-        pdao.deletePersons();
+        PersonDAO pdao = db.getPerson_dao();
         Person person = new Person("test", "test", "this", "test", "m");
 
         // insert without optional members (father_id...)
@@ -93,9 +94,8 @@ public class PersonDAOTest {
 
     @Test
     public void getPersonPass() throws  Exception{
+        PersonDAO pdao = db.getPerson_dao();
 
-        PersonDAO pdao = new PersonDAO();
-        pdao.deletePersons();
         Person person = new Person("test", "test", "this", "test", "m");
         Person compare_person = null;
 
@@ -112,9 +112,8 @@ public class PersonDAOTest {
 
     @Test
     public void getPersonFail() throws Exception{
+        PersonDAO pdao = db.getPerson_dao();
 
-        PersonDAO pdao = new PersonDAO();
-        pdao.deletePersons();
         Person person = new Person("test", "test", "this", "test", "m");
         Person compare_person = null;
 
@@ -135,8 +134,7 @@ public class PersonDAOTest {
      */
     @Test
     public void getPersonAllPass() throws Exception{
-        PersonDAO pdao = new PersonDAO();
-        pdao.deletePersons();
+        PersonDAO pdao = db.getPerson_dao();
 
         final int NUM_ROWS = 10;
 

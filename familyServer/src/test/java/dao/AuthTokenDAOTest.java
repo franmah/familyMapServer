@@ -5,24 +5,27 @@ import static org.junit.Assert.*;
 import models.AuthToken;
 
 public class AuthTokenDAOTest {
+    private OperationDAO db = null;
 
     @Before
     public void setUp() throws Exception {
+        db = new OperationDAO();
     }
 
     @After
     public void tearDown() throws Exception {
+        db.commitAndCloseConnection(false);
+        db = null;
     }
 
     @Test
     public void deletePass() throws  Exception{
-        AuthTokenDAO atd = new AuthTokenDAO();
+        AuthTokenDAO atd = db.getAutToken_dao();
         assertTrue(atd.deleteTokens());
     }
     @Test
     public void addPass() throws Exception{
-        AuthTokenDAO atd = new AuthTokenDAO();
-        atd.deleteTokens();
+        AuthTokenDAO atd = db.getAutToken_dao();
 
         AuthToken token = new AuthToken("test");
 
@@ -40,7 +43,7 @@ public class AuthTokenDAOTest {
 
     @Test
     public void addFail(){
-        AuthTokenDAO atd = new AuthTokenDAO();
+        AuthTokenDAO atd = db.getAutToken_dao();
 
         AuthToken token1 = new AuthToken("test");
         AuthToken token2 = new AuthToken(token1.getToken(), "test2");
@@ -61,7 +64,7 @@ public class AuthTokenDAOTest {
 
     @Test
     public void isConnectedPass(){
-        AuthTokenDAO atd = new AuthTokenDAO();
+        AuthTokenDAO atd = db.getAutToken_dao();
 
         AuthToken token = new AuthToken("test");
 
@@ -80,7 +83,7 @@ public class AuthTokenDAOTest {
 
     @Test
     public void isConnectedFail(){
-        AuthTokenDAO atd = new AuthTokenDAO();
+        AuthTokenDAO atd = db.getAutToken_dao();
 
         AuthToken token = new AuthToken("test");
 
@@ -98,8 +101,8 @@ public class AuthTokenDAOTest {
 
     @Test
     public void  isUserConnected(){
-        UserDAO udao = new UserDAO();
-        AuthTokenDAO atdao = new AuthTokenDAO();
+        UserDAO udao = db.getUser_dao();
+        AuthTokenDAO atdao = db.getAutToken_dao();
 
         models.User user = new models.User("test", "password", "test@test.com", "this",
                 "test", "f", "test_id");

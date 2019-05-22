@@ -209,7 +209,7 @@ public class UserDAO{
             }
             catch (Exception e){
                System.out.println(LocalTime.now() + " UserDao.deleteUser(): ERROR couldn't close prepared statement, " + e.toString());
-               throw new DataBaseException("Couldn't add user");
+               throw new DataBaseException("Unable to delete users");
             }
          }
       }
