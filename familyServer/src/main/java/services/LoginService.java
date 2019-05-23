@@ -19,16 +19,22 @@ public class LoginService{
     public LoginService(){}
     
     /**
-     * Connect a user using a user_name and a password
+     * Connect a user using a user_name and a password. Check for parameters before passing them to DAO classes.
      * 
      * @param   req: The request containing the user_name and password
      * @return  error message if user wasn't connected
      *          else: token, user_name and person id
      */
-    public static Response LoginUser(LoginRequest req){
+    public Response LoginUser(LoginRequest req){
 
         String user_name = req.getUserName();
         String password = req.getPassword();
+
+        if(user_name == null || password == null){
+            System.out.println(LocalTime.now() + " LoginService: Fail -> username or password NULL.");
+            return new ErrorResponse("Need a username and a password");
+        }
+
         boolean commit = false;
 
         OperationDAO db = null;
@@ -66,10 +72,10 @@ public class LoginService{
             if(db != null){
                 db.commitAndCloseConnection(commit);
                 if(commit) {
-                    System.out.println(LocalTime.now() + " LoginService: connection closed -> changes were commited");
+                    System.out.println(LocalTime.now() + " LoginService: connection closed -> changes were committed");
                 }
                 else{
-                    System.out.println(LocalTime.now() + " LoginService: connection closed -> changes not were commited");
+                    System.out.println(LocalTime.now() + " LoginService: connection closed -> changes not were committed");
                 }
             }
         }

@@ -25,7 +25,28 @@ public class RegisterRequest{
         this.gender = gender;
             
     }
-    
-    
 
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getFirst_name() {
+        return first_name;
+    }
+
+    public String getLast_name() {
+        return last_name;
+    }
+
+    public String getGender() {
+        return gender;
+    }
 }

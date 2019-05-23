@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Person object. 
@@ -20,13 +21,22 @@ public class Person{
     
     public Person(){}
     
-    public Person(String person_id, String user_name, String first_name, String last_name,
+    public Person(String user_name, String first_name, String last_name,
         String gender){
-            this.person_id = person_id;
+            this.person_id = UUID.randomUUID().toString();
             this.user_name = user_name;
             this.first_name = first_name;
             this.last_name = last_name;
             this.gender = gender;
+    }
+
+    public Person(String person_id, String user_name, String first_name, String last_name,
+                  String gender){
+        this.person_id = person_id;
+        this.user_name = user_name;
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.gender = gender;
     }
         
     public void setFatherId(String father_id){

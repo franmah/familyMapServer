@@ -1,6 +1,7 @@
 package models;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Holds info for event objects.
@@ -22,9 +23,9 @@ public class Event{
     /**
      * Create an Event with given info
      */
-    public Event(String event_id, String user_name, String person_id, float latitude,
+    public Event(String user_name, String person_id, float latitude,
         float longitude, String country, String city, String type, int year){
-            this.event_id = event_id;
+            this.event_id = UUID.randomUUID().toString();
             this.user_name = user_name;
             this.person_id = person_id;
             this.latitude = latitude;
@@ -34,7 +35,19 @@ public class Event{
             this.type = type;
             this.year = year;
         }
-        
+
+    public Event(String event_id, String user_name, String person_id, float latitude,
+                 float longitude, String country, String city, String type, int year){
+        this.event_id = event_id;
+        this.user_name = user_name;
+        this.person_id = person_id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.country = country;
+        this.city = city;
+        this.type = type;
+        this.year = year;
+    }
     public String getEventId(){return event_id;}
     public String getUserName(){return user_name;}
     public String getPersonId(){return person_id;}

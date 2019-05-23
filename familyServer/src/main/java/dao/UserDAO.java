@@ -26,10 +26,13 @@ public class UserDAO{
     */
    public boolean addUser(User user) throws DataBaseException {
 
+      // Check if user is already registered
+      User tmp_user = getUser(user.getUserName());
+      if(tmp_user != null){
+         return false;
+      }
       // Create update statement:
       String query = "INSERT INTO users VALUES(?,?,?,?,?,?,?);";
-
-      boolean commit = false;
 
       PreparedStatement stmt = null;
 
@@ -44,7 +47,6 @@ public class UserDAO{
          stmt.setString(7, user.getGender());
          stmt.setString(2, user.getPersonId());
 
-
          stmt.executeUpdate();
 
       }
@@ -55,7 +57,7 @@ public class UserDAO{
       catch(Exception e){
          System.out.println(LocalTime.now() + "UserDao.addUser(): " + e.toString());
          e.getStackTrace();
-         throw new DataBaseException("Something went wrong while trying to add the user");
+         throw new DataBaseException("Internal Error: Something went wrong while trying to register the user");
       }
       finally{
          if(stmt != null){
@@ -63,8 +65,8 @@ public class UserDAO{
                stmt.close();
             }
             catch (Exception e){
-               System.out.println(LocalTime.now() + " UserDao.addUser(): ERROR couldn't close prepared statement, " + e.toString());
-               throw new DataBaseException("Couldn't add user");
+               System.out.println(LocalTime.now() + " UserDao.addUser(): ERROR unable to close prepared statement, " + e.toString());
+               throw new DataBaseException("Internal Error: Something went wrong while trying to register the user");
             }
          }
       }

@@ -189,6 +189,14 @@ public class OperationDAO{
         }
     }
 
+    public void commitChanges() throws  DataBaseException{
+        try {
+            connection.commit();
+        }
+        catch (Exception e){
+            System.out.println(LocalTime.now() + " OperationDAO.commitChanges() : ERROR: unable to commit changes");
+        }
+    }
 
 
 ////////////////////////////////////////////////
