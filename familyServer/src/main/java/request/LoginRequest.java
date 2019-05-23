@@ -17,7 +17,7 @@ public class LoginRequest{
     }
     
     public String getUserName(){return user_name;}
-    public String getPasswor(){return password;}
+    public String getPassword(){return password;}
     
     public void setUserName(String user_name){
         this.user_name = user_name;

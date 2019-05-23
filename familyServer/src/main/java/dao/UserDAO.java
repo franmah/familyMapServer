@@ -142,7 +142,7 @@ public class UserDAO{
 
    /**
     * Create a token and use it to connect the user. If the user can't be logged in an error will be thrown,
-    * Check if the user is registered and if the password is right.
+    * Check if the user is registered and if the password is right (if not return a null string)
     * @param   user_name: the user to connect.
     * @param   password: the user's password.
     * @return  unique string token. If String is null then user was not registered or the password was wrong.
