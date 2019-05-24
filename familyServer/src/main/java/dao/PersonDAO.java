@@ -27,7 +27,7 @@ public class PersonDAO{
     public boolean addPerson(Person person) throws DataBaseException{
 
         // Check if person already exists
-        Person tmp_person = getPerson(person.getPersonId());
+        Person tmp_person = getPerson(person.getPersonId(), person.getUserName());
         if(tmp_person != null){
             System.out.println(LocalTime.now() + "personDAO.addPerson(): Error: person already in database");
             return false;
@@ -79,13 +79,15 @@ public class PersonDAO{
         }
 
     }
-    
+
     /**
      * Get a person according to it's id
      * @param   person_id: the id of the person to fetch.
      * @return  the Person, will be null if the Person wasn't found.
      */
-    public Person getPerson(String person_id) throws DataBaseException{
+    public Person getPerson(String person_id, String user_name) throws DataBaseException{
+        assert person_id != null : "PersondAO.getPerson: person_id is null";
+        assert user_name != null : "PersondAO.getPerson: user_name is null";
 
         Person person = null;
 
@@ -115,10 +117,16 @@ public class PersonDAO{
             }
             if(person != null){
                 System.out.println(LocalTime.now() + " personDAO.getPerson() : Fetched person: \"" + person.getPersonId() + "\".");
+
+                if(!person.getUserName().equals(user_name)){
+                    System.out.println(LocalTime.now() + " personDAO.getPerson() : usernames don't correspond.");
+                    throw new DataBaseException("Wrong user.");
+                }
             }
             else{
                 System.out.println(LocalTime.now() + " personDAO.getPerson() : Person \"" + person_id + "\" not found.");
             }
+
             return person;
 
         }
@@ -159,17 +167,20 @@ public class PersonDAO{
      * 
      * @return  An array with every Person fetched.
      */
-    public List<Person> getPersonAll() throws DataBaseException{
+    public List<Person> getPersonAll(String user_name) throws DataBaseException{
+        assert user_name != null : "PersondAO.getPersonAll(): user_name is null";
+
         List<Person> people = new ArrayList<>();
         Person person = null;
 
         ResultSet result = null;
         PreparedStatement stmt = null;
 
-        String query = "SELECT * FROM persons;";
+        String query = "SELECT * FROM persons WHERE user_name = ?;";
 
         try{
             stmt = connection.prepareStatement(query);
+            stmt.setString(1, user_name);
             result = stmt.executeQuery();
 
             // Fill array of Person

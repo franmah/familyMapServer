@@ -24,7 +24,8 @@ public class PersonService{
      *          return ErrorResponse if an error occurs.
      */
     public static Response getPerson(AuthToken token, String person_id){
-        
+        // NEED TO CHECK TOKEN!
+        // SHOULD YOU HAVE A AUTHTOKEN OR SIMPLY A STRING TOKEN ??
         return null;
     }
 }

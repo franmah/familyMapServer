@@ -42,11 +42,9 @@ public class Person{
     public void setFatherId(String father_id){
         this.father_id = father_id;
     }
-    
     public void setMotherId(String mother_id){
         this.mother_id = mother_id;
     }
-    
     public void setSpouseId(String spouse_id){
         this.spouse_id = spouse_id;
     }

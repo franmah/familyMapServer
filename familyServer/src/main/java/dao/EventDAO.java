@@ -28,7 +28,7 @@ public class EventDAO{
     public boolean addEvent(Event event) throws DataBaseException{
 
         // Check if person already exists
-        Event tmp_event = getEvent(event.getEventId());
+        Event tmp_event = getEvent(event.getEventId(), event.getUserName());
         if(tmp_event != null){
             System.out.println(LocalTime.now() + " eventDAO.addEvent(): Error: person already in database");
             return false;
@@ -87,7 +87,7 @@ public class EventDAO{
      * @param   event_id: the id of the event.
      * @return  the event as an Event object, return null if the event is not found.
      */
-    public Event getEvent(String event_id) throws DataBaseException {
+    public Event getEvent(String event_id, String user_name) throws DataBaseException {
         Event event = null;
 
         ResultSet result = null;
@@ -117,7 +117,15 @@ public class EventDAO{
 
             if(event != null){
                 System.out.println(LocalTime.now() + " EventDAO.getEvent() : Fetched event: \"" + event.getEventId() + "\"");
-                return event;
+
+                if(event.getUserName().equals(user_name)){
+                    System.out.println(LocalTime.now() + " EventDAO.getEvent() : usernames correspond");
+                    return event;
+                }
+                else {
+                    System.out.println(LocalTime.now() + " EventDAO.getEvent() : usernames don't correspond");
+                    throw new DataBaseException("The event you requested belongs to another user");
+                }
             }
             else{
                 System.out.println(LocalTime.now() + " EventDAO.getEvent() : No event \"" + event_id + "\" found");
@@ -160,7 +168,7 @@ public class EventDAO{
      * Then Call the Select method in OperationDAO.
      * @return  an array containing the events, as Event objects, fetched from the database.
      */
-    public List<Event> getEventAll() throws DataBaseException {
+    public List<Event> getEventAll(String user_name) throws DataBaseException {
 
         List<Event> events = new ArrayList<>();
         Event event = null;
@@ -168,10 +176,11 @@ public class EventDAO{
         ResultSet result = null;
         PreparedStatement stmt = null;
 
-        String query = "SELECT * FROM events;";
+        String query = "SELECT * FROM events WHERE user_name = ?;";
 
         try{
             stmt = connection.prepareStatement(query);
+            stmt.setString(1, user_name);
             result = stmt.executeQuery();
 
             // Fill array of Event

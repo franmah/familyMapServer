@@ -101,7 +101,7 @@ public class PersonDAOTest {
 
         try{
             pdao.addPerson(person);
-            compare_person = pdao.getPerson("test");
+            compare_person = pdao.getPerson("test", "test");
         }
         catch (Exception e){
             assertTrue(false);
@@ -120,7 +120,7 @@ public class PersonDAOTest {
         try{
             pdao.addPerson(person);
             // The names are different.
-            compare_person = pdao.getPerson("different_test");
+            compare_person = pdao.getPerson("different_test", "test");
         }
         catch (Exception e){
             assertFalse(false); // This test should fail because getPerson will return an exception.
@@ -128,6 +128,26 @@ public class PersonDAOTest {
 
         assertNotEquals(person, compare_person);
     }
+
+    @Test
+    public void getPersonWrongUserName(){
+        PersonDAO pdao = db.getPerson_dao();
+
+        Person person = new Person("test", "test", "this", "test", "m");
+        Person compare_person = null;
+
+        try{
+            pdao.addPerson(person);
+            // The names are different.
+            compare_person = pdao.getPerson("test", "wrong");
+        }
+        catch (Exception e){
+            assertFalse(false); // This test should fail because getPerson will return an exception.
+        }
+
+        assertNotEquals(person, compare_person);
+    }
+
 
     /**
      * Add some dummy entries to the database and check if getPersonAll return the right number of entry.
@@ -145,8 +165,34 @@ public class PersonDAOTest {
         boolean success = false;
 
         try{
-            List<Person> people = pdao.getPersonAll();
+            List<Person> people = pdao.getPersonAll("test");
             if(people.size() == NUM_ROWS){
+                success = true;
+            }
+        }
+        catch (Exception e){
+            success = false;
+        }
+
+        assertTrue(success);
+    }
+
+    @Test
+    public void getPersonAllWrongUserName(){
+
+        PersonDAO pdao = db.getPerson_dao();
+
+        final int NUM_ROWS = 10;
+
+        for(int i = 0; i < NUM_ROWS; i++) {
+            pdao.addPerson(new Person(String.format("test" + i), "test", "this", "test", "m"));
+        }
+
+        boolean success = false;
+
+        try{
+            List<Person> people = pdao.getPersonAll("wrong");
+            if(people.size() == 0){
                 success = true;
             }
         }

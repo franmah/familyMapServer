@@ -24,4 +24,9 @@ public class EventService{
         
         return null;
     }
+
+    public Response getEventAll(){
+
+        return null;
+    }
 }
