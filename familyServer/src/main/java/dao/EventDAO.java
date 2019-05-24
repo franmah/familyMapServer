@@ -30,7 +30,7 @@ public class EventDAO{
         // Check if person already exists
         Event tmp_event = getEvent(event.getEventId(), event.getUserName());
         if(tmp_event != null){
-            System.out.println(LocalTime.now() + " eventDAO.addEvent(): Error: person already in database");
+            System.out.println(LocalTime.now() + " eventDAO.addEvent(): Error: event already in database");
             return false;
         }
 
@@ -55,7 +55,7 @@ public class EventDAO{
 
             stmt.executeUpdate();
 
-            System.out.println(LocalTime.now() + " eventDAO.addEvent(): event: \"" + event.getPersonId() + "\" has been added");
+            System.out.println(LocalTime.now() + " eventDAO.addEvent(): event: \"" + event.getEventId() + "\" has been added");
             return true;
 
         }

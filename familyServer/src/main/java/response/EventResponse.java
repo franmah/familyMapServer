@@ -35,4 +35,6 @@ public class EventResponse extends Response{
         this.type = type;
         this.year = year;
     }
+
+
 }

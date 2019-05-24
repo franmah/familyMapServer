@@ -36,8 +36,9 @@ public class AuthTokenDAO{
             String user_name = null;
 
             if(result.next()){
-                System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): A pair user/token has been found");
                 user_name = result.getString("user_name");
+                System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): A pair user/token has been found for: \"" +
+                               user_name + "\"");
 
             }
             else{

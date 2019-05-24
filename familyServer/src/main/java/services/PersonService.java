@@ -92,7 +92,7 @@ public class PersonService{
                 System.out.println(LocalTime.now() + " PersonService.getPersonAll(): user not connected.");
                 return new ErrorResponse("User not connected");
             }
-            System.out.println(LocalTime.now() + " PersonService.getPersonAll(): user is connected.");
+            System.out.println(LocalTime.now() + " PersonService.getPersonAll(): user \"" + user_name + "\"  is connected.");
 
             // Get list of people
             List<Person> people = db.getPerson_dao().getPersonAll(user_name);

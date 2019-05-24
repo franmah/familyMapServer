@@ -176,14 +176,15 @@ public class OperationDAO{
 
                 connection.close();
                 if(commit) {
-                    System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed and changes were committed");
+                    System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): connection has been closed and changes were committed");
                 }
                 else{
-                    System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): connection has been closed and changes were not committed");
+                    System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): connection has been closed and changes were not committed");
                 }
             }
             catch(Exception e){
-                System.out.println(LocalTime.now() + " OperationDAO.closeConnection(): Error: " + e.toString());
+                System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): Error: " + e.toString());
+                e.printStackTrace();
                 throw new DataBaseException("The connection couldn't be closed.");
             }
         }

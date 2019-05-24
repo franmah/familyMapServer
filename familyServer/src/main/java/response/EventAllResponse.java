@@ -1,5 +1,7 @@
 package response;
 
+import java.util.List;
+
 import models.Event;
 
 /**
@@ -10,17 +12,15 @@ import models.Event;
  */
 public class EventAllResponse extends Response{
     
-    private Event[] events = null;
+    private List<Event> events = null;
     
     public EventAllResponse(){}
     
-    public EventAllResponse(Event[] events){
+    public EventAllResponse(List<Event> events){
         this.events = events;
     }
-    
-    public void addEvent(Event event){
-        
+
+    public List<Event> getEvents() {
+        return events;
     }
-    
-    
 }
