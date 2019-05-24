@@ -95,13 +95,14 @@ public class PersonDAOTest {
     @Test
     public void getPersonPass() throws  Exception{
         PersonDAO pdao = db.getPerson_dao();
+        pdao.deletePersons();
 
-        Person person = new Person("test", "test", "this", "test", "m");
+        Person person = new Person("test_person", "test_user", "first", "last", "m");
         Person compare_person = null;
 
         try{
             pdao.addPerson(person);
-            compare_person = pdao.getPerson("test", "test");
+            compare_person = pdao.getPerson("test_person", "test_user");
         }
         catch (Exception e){
             assertTrue(false);

@@ -1,5 +1,7 @@
 package response;
 
+import java.util.List;
+
 import models.Person;
 
 /**
@@ -10,15 +12,15 @@ import models.Person;
  */
 public class PersonAllResponse extends Response{
     
-    private Person[] people = null;
+    private List<Person> people = null;
     
     public PersonAllResponse(){}
     
-    public PersonAllResponse(Person[] people){
+    public PersonAllResponse(List<Person> people){
         this.people = people;
     }
-    
-    public void addPerson(Person person){
-        
+
+    public List<Person> getPeople() {
+        return people;
     }
 }

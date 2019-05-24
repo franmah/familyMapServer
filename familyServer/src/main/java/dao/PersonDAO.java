@@ -106,7 +106,7 @@ public class PersonDAO{
                 System.out.println(LocalTime.now() + " personDAO.getPerson(): person \"" + person_id + "\" has been found.");
 
                 person = new Person(result.getString("person_id"),
-                                    result.getString("person_id"),
+                                    result.getString("user_name"),
                                     result.getString("first_name"),
                                     result.getString("last_name"),
                                     result.getString("gender"));
@@ -117,6 +117,8 @@ public class PersonDAO{
             }
             if(person != null){
                 System.out.println(LocalTime.now() + " personDAO.getPerson() : Fetched person: \"" + person.getPersonId() + "\".");
+                System.out.println(LocalTime.now() + " personDAO.getPerson() : user making request: \"" + user_name + "\", " +
+                                    "owner: \"" + person.getUserName() + "\"");
 
                 if(!person.getUserName().equals(user_name)){
                     System.out.println(LocalTime.now() + " personDAO.getPerson() : usernames don't correspond.");
@@ -187,7 +189,7 @@ public class PersonDAO{
             while(result.next()){
 
                 person = new Person(result.getString("person_id"),
-                        result.getString("person_id"),
+                        result.getString("user_name"),
                         result.getString("first_name"),
                         result.getString("last_name"),
                         result.getString("gender"));

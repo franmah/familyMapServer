@@ -22,7 +22,7 @@ public class AuthTokenDAO{
      * @param   token: the user's token.
      * @return  the user_name, will be null if no user found.
      */
-    public boolean isConnected(AuthToken token) throws DataBaseException{
+    public String isConnected(String token) throws DataBaseException{
         ResultSet result = null;
         PreparedStatement stmt = null;
 
@@ -30,7 +30,7 @@ public class AuthTokenDAO{
 
         try{
             stmt = connection.prepareStatement(query);
-            stmt.setString(1, token.getToken());
+            stmt.setString(1, token);
             result = stmt.executeQuery();
 
             String user_name = null;
@@ -38,18 +38,13 @@ public class AuthTokenDAO{
             if(result.next()){
                 System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): A pair user/token has been found");
                 user_name = result.getString("user_name");
+
             }
             else{
                 System.out.println(LocalTime.now() + " AuthToken.isConnected(): No user found for this token");
-                return false;
             }
 
-            if(user_name.equals(token.getUser())){
-                return true;
-            }
-            else{
-                return false;
-            }
+            return user_name;
 
         }
         catch(DataBaseException message){
@@ -88,6 +83,13 @@ public class AuthTokenDAO{
      * @return  true if the token is added, else return an error.
      */
     public boolean addToken(AuthToken token) throws DataBaseException{
+        // check if user is already connected
+        String test_connection = isConnected(token.getToken());
+        if(test_connection != null){
+            System.out.println(LocalTime.now() + "  AuthTokenDao.addToken(): ERROR: User is already connected ");
+            throw  new DataBaseException("User already connected");
+        }
+
         // Create update statement:
         String query = "INSERT INTO authtokens VALUES(?,?);";
 

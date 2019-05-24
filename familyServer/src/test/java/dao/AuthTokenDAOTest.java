@@ -73,7 +73,10 @@ public class AuthTokenDAOTest {
         try{
             atd.deleteTokens();
             atd.addToken(token);
-            success = atd.isConnected(token);
+
+            if(atd.isConnected(token.getToken()).equals(token.getUser())){
+                success = true;
+            }
         }
         catch (Exception e){
             success = false;
@@ -91,7 +94,9 @@ public class AuthTokenDAOTest {
 
         try{
             atd.deleteTokens();
-            success = atd.isConnected(token);
+            if(atd.isConnected(token.getToken()).equals(token.getUser())){
+                success = true;
+            }
         }
         catch (Exception e){
             success = false;
@@ -106,17 +111,20 @@ public class AuthTokenDAOTest {
 
         models.User user = new models.User("test", "password", "test@test.com", "this",
                 "test", "f", "test_id");
-        boolean success = true;
+        boolean success = false;
         try{
             udao.deleteUsers();
             udao.addUser(user);
 
-            String str = udao.connectUser("test", "password");
-            System.out.println(str);
+            String token_id = udao.connectUser("test", "password");
+            System.out.println(token_id);
 
-            AuthToken token = new AuthToken(str, user.getUserName());
+            AuthToken token = new AuthToken(token_id, user.getUserName());
 
-            success = atdao.isConnected(token);
+            if(atdao.isConnected(token_id).equals(user.getUserName())){
+                success = true;
+            }
+
         }
         catch (Exception e){
             success = false;

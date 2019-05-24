@@ -1,5 +1,7 @@
 package services;
 
+import java.time.LocalTime;
+
 import models.*;
 import response.Response;
 import response.ErrorResponse;
@@ -20,8 +22,10 @@ public class EventService{
      * @return  return an EventResponse if the event is fetched.
      *          Else return an ErrorResponse.
      */
-    public static Response getEvent(AuthToken token, String event_id){
-        
+    public static Response getEvent(String token, String event_id){
+        if(token == null || event_id == null){
+            System.out.println(LocalTime.now() + " EventService.getEvent(): Error: one of the parameters is null");
+        }
         return null;
     }
 
