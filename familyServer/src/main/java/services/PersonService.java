@@ -41,17 +41,15 @@ public class PersonService{
             db = new OperationDAO();
 
             // Check if user is connected
-            AuthTokenDAO atdao = db.getAutToken_dao();
-            String user_name = atdao.isConnected(token);
+            String user_name = db.getAutToken_dao().isConnected(token);
             if(user_name == null){
                 System.out.println(LocalTime.now() + " PersonService.getPerson(): user not connected.");
                 return new ErrorResponse("User not connected");
             }
-            System.out.println(LocalTime.now() + " PersonService.getPerson(): user is connected.");
+            System.out.println(LocalTime.now() + " PersonService.getPerson(): user is connected. Fetching person...");
 
             // Get the person
-            PersonDAO pdao = db.getPerson_dao();
-            Person person = pdao.getPerson(person_id, user_name);
+            Person person = db.getPerson_dao().getPerson(person_id, user_name);
 
             if(person != null){
                 return new PersonResponse(person.getUserName(), person.getPersonId(), person.getFirstName(),

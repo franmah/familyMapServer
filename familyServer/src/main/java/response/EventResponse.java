@@ -7,8 +7,10 @@ import models.Event;
  * Return the info for a single event.
  */
 public class EventResponse extends Response{
-    
-    private String id = null;
+
+
+
+    private String event_id = null;
     private String user_name = null;
     private String person_id = null;
     private float latitude = 0;
@@ -20,4 +22,17 @@ public class EventResponse extends Response{
 
     public EventResponse(){}
 
+    public EventResponse(String event_id, String user_name, String person_id, float latitude,
+                         float longitude, String country, String city, String type, int year) {
+
+        this.event_id = event_id;
+        this.user_name = user_name;
+        this.person_id = person_id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.country = country;
+        this.city = city;
+        this.type = type;
+        this.year = year;
+    }
 }
