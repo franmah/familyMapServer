@@ -6,50 +6,26 @@ import org.junit.Test;
 import models.*;
 
 import dao.OperationDAO;
+import response.ErrorResponse;
+import response.Response;
+import response.SuccessResponse;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class FillServiceTest {
 
-/*
-    @Test
-    public void birthTest(){
-        try {
-            OperationDAO db = new OperationDAO();
-            db.getEvent_dao().deleteEvents();
-            db.getPerson_dao().deletePersons();
-            db.getUser_dao().deleteUsers();
-
-            User user = new User("test_user", "password", "email", "first", "last", "f", "test_person");
-            Person person = new Person("test_person", "test_user", "first", "last", "f");
-            Event event = new Event("test_event", "test_user", "test_person", (float) 10, (float) 10, "Counttry", "city", "birth", 1993);
-
-            db.getUser_dao().addUser(user);
-            db.getPerson_dao().addPerson(person);
-            db.getEvent_dao().addEvent(event);
-            db.commitAndCloseConnection(true);
-
-
-            // birth event.
-            FillService service = new FillService();
-            if(service.generateRandomEvent(person.getPersonId(), user.getUserName())){
-                System.out.println("success");
-            }
-            else{
-                System.out.println("failure");
-            }
-
-
-            db.commitAndCloseConnection(false);
-        }
-        catch (Exception e){
-            System.out.println(e.toString());
-            e.printStackTrace();
-        }
+    @After
+    public void tearDown(){
+        OperationDAO db = new OperationDAO();
+        db.getEvent_dao().deleteEvents();
+        db.getPerson_dao().deletePersons();
+        db.getUser_dao().deleteUsers();
+        db.commitAndCloseConnection(true);
     }
-    */
     @Test
     public void fillTreeCompleteTest(){
+        boolean success = true;
+        final String ANSWER = "Successfully generated 31 people and 91 event(s)";
         try {
             OperationDAO db = new OperationDAO();
             db.getEvent_dao().deleteEvents();
@@ -58,21 +34,70 @@ public class FillServiceTest {
 
             User user = new User("test_user", "password", "email", "first", "last", "f", "test_person");
             Person person = new Person("test_person", "test_user", "first", "last", "f");
-            Event event = new Event("test_event", "test_user", "test_person", (float) 10, (float) 10, "Counttry", "city", "birth", 1993);
 
             db.getUser_dao().addUser(user);
             db.getPerson_dao().addPerson(person);
-            db.getEvent_dao().addEvent(event);
             db.commitAndCloseConnection(true);
 
             FillService service = new FillService();
-            service.fillUserTree("test_user", 4);
+            Response response = service.fillUserTree("test_user", 4);
+
+            if(response instanceof SuccessResponse){
+                success = true;
+                assertEquals(ANSWER, response.toString());
+            }
+
+            if(response instanceof ErrorResponse){
+                success = true;
+            }
 
         }
         catch (Exception e){
             System.out.println(e.toString());
             e.printStackTrace();
+            success = true;
         }
+
+        assertTrue(success);
+    }
+
+    @Test
+    public void fillTreeWrongUser(){
+        boolean success = true;
+        final String ANSWER = "Successfully generated 31 people and 91 event(s)";
+        try {
+            OperationDAO db = new OperationDAO();
+            db.getEvent_dao().deleteEvents();
+            db.getPerson_dao().deletePersons();
+            db.getUser_dao().deleteUsers();
+
+            User user = new User("test_user", "password", "email", "first", "last", "f", "test_person");
+            Person person = new Person("test_person", "test_user", "first", "last", "f");
+
+            db.getUser_dao().addUser(user);
+            db.getPerson_dao().addPerson(person);
+            db.commitAndCloseConnection(true);
+
+            FillService service = new FillService();
+            Response response = service.fillUserTree("wrong_user", 4);
+
+            if(response instanceof SuccessResponse){
+                success = false;
+                assertEquals(ANSWER, response.toString());
+            }
+
+            if(response instanceof ErrorResponse){
+                success = true;
+            }
+
+        }
+        catch (Exception e){
+            System.out.println(e.toString());
+            e.printStackTrace();
+            success = true;
+        }
+
+        assertTrue(success);
     }
 
 }

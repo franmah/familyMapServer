@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+
+import java.util.Calendar;
 import java.util.Random;
 import dao.DataBaseException;
 import dao.OperationDAO;
@@ -119,7 +121,9 @@ public class FillService{
 
     public FillService(){}
 
-
+    /** Fill the class object using the json files in /jsonFiles/
+     *
+     */
     static {
         File location_file = new File(location_path);
         File fnames_file = new File(fnames_path);
@@ -156,11 +160,11 @@ public class FillService{
         }
 
     }
-    
+
     /**
-     * Method called by other classes. 
+     * Method called by other classes.
      * Find a user, it's person and generate his family tree.
-     * 
+     *
      * @param   user_name: the user.
      * @param   num_generations: number of generations to create.
      * @return  SuccessResponse or ErrorResponse with an explanation message.
@@ -179,7 +183,8 @@ public class FillService{
         }
 
         num_events = 0;
-        num_person = 1; // The user Person itself has already been generated during registration.
+        num_person = 1; // start at 1: the user itself
+
         boolean commit = false;
 
         try {
@@ -193,7 +198,10 @@ public class FillService{
             }
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): User \"" + user_name + "\" is registered.");
 
-            // GENERATE BIRTH FOR USER
+            generateUserBirth(user);
+            num_events++;
+
+
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): generating family tree...");
             generateTree(db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName()), user_name, num_generations, 1);
 
@@ -216,11 +224,11 @@ public class FillService{
                 db.commitAndCloseConnection(commit);
         }
     }
-    
+
     /**
      * fillUserTree helper.
      * Recursively generate random family tree.
-     * 
+     *
      * @param   child: person who's parents will be generated and then attached to.
      * @param   num_generations: number of generations to generate.
      * @param   current_generation: number giving the generation it the method is creating.
@@ -240,21 +248,14 @@ public class FillService{
             num_person++;
             System.out.println(LocalTime.now() + " FillService.generateTree(): Person generated: " + mother.toString());
 
-            if(generateBirth(child, mother.getPersonId(), user_name)){
-                System.out.println(LocalTime.now() + " FillService.generateTree(): birth successfully generated for the mother");
-            }
-            else{
-                System.out.println(LocalTime.now() + " FillService.generateTree(): birth successfully generated for the mother");
-                throw new Exception("Error while generating birth");
-            }
+            generateBirth(child, mother.getPersonId(), user_name);
+            num_events++;
+            System.out.println(LocalTime.now() + " FillService.generateTree(): birth successfully generated for the mother");
 
-            if(generateRandomEvent(mother.getPersonId(), user_name)){
-                System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the mother");
-            }
-            else{
-                System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the mother");
-                throw new Exception("Error while generating random event");
-            }
+            generateRandomEvent(mother.getPersonId(), user_name);
+            num_events++;
+            System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the mother");
+
 
             // recursive call
             generateTree(mother, user_name, num_generations, ++current_generation);
@@ -266,33 +267,20 @@ public class FillService{
             num_person++;
             System.out.println(LocalTime.now() + " FillService.generateTree(): Person generated: " + father.toString());
 
-            if(generateBirth(child, father.getPersonId(), user_name)){
-                System.out.println(LocalTime.now() + " FillService.generateTree(): birth successfully generated for the father");
-                num_events++;
-            }
-            else{
-                System.out.println(LocalTime.now() + " FillService.generateTree(): birth successfully generated for the father");
-                throw new Exception("Error while generating birth");
-            }
+            generateBirth(child, father.getPersonId(), user_name);
+            num_events++;
+            System.out.println(LocalTime.now() + " FillService.generateTree(): birth successfully generated for the father");
 
-            if(generateRandomEvent(father.getPersonId(), user_name)){
-                System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the father");
-                num_events++;
-            }
-            else{
-                System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the father");
-                throw new Exception("Error while generating random event");
-            }
+
+            generateRandomEvent(father.getPersonId(), user_name);
+            num_events++;
+            System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the father");
+
 
             // Generate marriage event for father and mother
-            if(generateMarriage(mother, father)){
-                System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated marriage");
-                num_events += 2;
-            }
-            else{
-                System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated marriage");
-                throw new Exception("Error while generating marriage");
-            }
+            generateMarriage(mother, father);
+            System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated marriage");
+            num_events += 2;
 
             mother.setSpouseId(father.getPersonId());
             father.setSpouseId(mother.getPersonId());
@@ -303,7 +291,6 @@ public class FillService{
             // Add the two Person in the database.
             person_dao.addPerson(mother);
             person_dao.addPerson(father);
-
 
             // Update child
             child.setMotherId(mother.getPersonId());
@@ -323,9 +310,10 @@ public class FillService{
 
     }
 
+
     /** Generate a random Person. !! Does not generate father/mother/spouse id.
-     * @param user_name: associated user name.
-     * @return the newly created Person
+     * @param user_name associated user name.
+     * @param gender
      */
     private Person generatePerson(String user_name, String gender){
         assert gender.length() == 1;
@@ -343,7 +331,8 @@ public class FillService{
 
     }
 
-    private boolean generateMarriage(Person wife, Person husband){
+
+    private void generateMarriage(Person wife, Person husband){
         System.out.println(LocalTime.now() + " FillService.generateMarriage(): generating marriage... ");
 
         try{
@@ -368,8 +357,6 @@ public class FillService{
                     location_tmp.getCountry(), location_tmp.city, "marriage", year));
             db.getEvent_dao().addEvent(new Event(husband.getUserName(), husband.getPersonId(), location_tmp.getLatitude(), location_tmp.getLongitude(),
                     location_tmp.getCountry(), location_tmp.city, "marriage", year));
-
-            return true;
         }
         catch (DataBaseException message){
             System.out.println(LocalTime.now() + " FillService.generateMarriage(): Error: " + message.toString());
@@ -382,13 +369,13 @@ public class FillService{
         }
     }
 
+
     /** Generate a random event from a list of possible event.
      *  The event happens within 60 years of the year of birth of the person.
      * @param person_id
      * @param user_name
-     * @return
      */
-    private boolean generateRandomEvent(String person_id, String user_name){
+    private void generateRandomEvent(String person_id, String user_name){
         System.out.println(LocalTime.now() + " FillService.generateRandomEvent():generating random event...");
 
         String[] event_types = {"bar mitzvah", "baptism", "graduation", "retirement", "first job"};
@@ -406,8 +393,6 @@ public class FillService{
 
             db.getEvent_dao().addEvent(new Event(user_name, person_id, location_tmp.latitude, location_tmp.longitude,
                     location_tmp.country, location_tmp.city, event_types[type_index], year));
-
-            return true;
         }
         catch (DataBaseException message){
             System.out.println(LocalTime.now() + " FillService.generateRandomEvent(): Error: " + message.toString());
@@ -424,9 +409,10 @@ public class FillService{
     /** Generate a birth event using the child'own birthdate.
      *
      * @param child
-     * @return
+     * @param person_id
+     * @param user_name
      */
-    private boolean generateBirth(Person child, String person_id, String user_name){
+    private void generateBirth(Person child, String person_id, String user_name){
         System.out.println(LocalTime.now() + " FillService.generateBirth(): generating birth...");
 
         assert  child != null;
@@ -435,7 +421,6 @@ public class FillService{
 
             // Find child's birth date.
             Event child_birth = db.getEvent_dao().getBirthEvent(child.getPersonId(), user_name);
-            if(child_birth == null) { return false; }
 
             int year = child_birth.getYear() - ((rand.nextInt() % 20) + 16);
             // 20 and 16 to have a relatively possible age of birth compared to the child.
@@ -446,8 +431,6 @@ public class FillService{
 
             db.getEvent_dao().addEvent(new Event(user_name, person_id, location_tmp.latitude, location_tmp.longitude,
                                 location_tmp.country, location_tmp.city, "birth", year));
-
-            return true;
         }
         catch (DataBaseException message){
             System.out.println(LocalTime.now() + " FillService.generateBirth(): Error: " + message.toString());
@@ -457,6 +440,38 @@ public class FillService{
             System.out.println(LocalTime.now() + " FillService.generateBirth(): Error: " + e.toString());
             e.printStackTrace();
             throw new DataBaseException("Internal error while generating birth event");
+        }
+    }
+
+
+    /** Generate birth event for the user, using the current year.
+     *
+     * @param user Generate event for this user.
+     */
+    private void generateUserBirth(User user){
+        assert user != null;
+
+        try{
+            final int MAX_AGE = 90; // Range in which the random number can be.
+
+            // Calendar.YEAR return the current year.
+            int year = Calendar.YEAR - (Math.abs(rand.nextInt() % MAX_AGE));
+
+            // Find random location
+            int location_index = Math.abs(rand.nextInt() % locations.getData().length);
+            Locations.Location location_tmp = locations.getData()[location_index];
+
+            db.getEvent_dao().addEvent(new Event(user.getUserName(), user.getPersonId(), location_tmp.getLatitude(),
+                    location_tmp.getLongitude(), location_tmp.getCountry(), location_tmp.city, "birth", year));
+        }
+        catch (DataBaseException message){
+            System.out.println(LocalTime.now() + " FillService.generateUserBirth(): Error: " + message.toString());
+            throw new DataBaseException(message.toString());
+        }
+        catch (Exception e){
+            System.out.println(LocalTime.now() + " FillService.generateUserBirth(): Error: " + e.toString());
+            e.printStackTrace();
+            throw new DataBaseException("Internal error while generating user's birth event");
         }
     }
 }

@@ -17,7 +17,7 @@ public class Server {
 
     private HttpServer server;
 
-    public void main(String[] args){
+    public static void main(String[] args){
         String port_number = args[0];
         new Server().run(port_number);
 

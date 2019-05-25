@@ -12,5 +12,13 @@ public class SuccessResponse extends Response{
     public SuccessResponse(String message){
         this.message = message;
     }
-    
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return message;
+    }
 }

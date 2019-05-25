@@ -5,8 +5,6 @@ import java.net.*;
 import java.nio.file.Files;
 import java.time.LocalTime;
 import java.lang.*;
-
-import com.sun.jndi.toolkit.url.Uri;
 import com.sun.net.httpserver.*;
 
 
@@ -30,8 +28,9 @@ public class FileHandler implements HttpHandler{
                 System.out.println(LocalTime.now() + " FileHandler: URI path: " + path);
 
                 if("/".equals(path)){
-                    path = "\\index.html";
+                    path = "/index.html";
                 }
+
                 path.replace('/', '\\');
                 path = WEBSITE_PATH + path;
 
@@ -42,9 +41,18 @@ public class FileHandler implements HttpHandler{
                     exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
                     OutputStream http_response = exchange.getResponseBody();
                     Files.copy(file_request.toPath(), http_response);
+                    http_response.close();
 
+                    success = true;
                 }
+                else{
+                    System.out.println(LocalTime.now() + " FileHandler: final not found");
+                }
+            }
 
+            if(!success){
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+                exchange.getResponseBody().close();
             }
         }
         catch (Exception e){
