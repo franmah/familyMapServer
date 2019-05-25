@@ -1,14 +1,13 @@
 package services;
 
 import org.junit.*;
-
+import static org.junit.Assert.*;
 import java.time.LocalTime;
-
 import response.ErrorResponse;
 import response.Response;
 import response.SuccessResponse;
 
-import static org.junit.Assert.*;
+
 
 public class ClearServiceTest {
 

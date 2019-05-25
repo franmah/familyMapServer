@@ -27,7 +27,7 @@ public class EventDAO{
      */
     public boolean addEvent(Event event) throws DataBaseException{
 
-        // Check if person already exists
+        // Check if event already exists
         Event tmp_event = getEvent(event.getEventId(), event.getUserName());
         if(tmp_event != null){
             System.out.println(LocalTime.now() + " eventDAO.addEvent(): Error: event already in database");
@@ -83,7 +83,6 @@ public class EventDAO{
     
     /**
      * Create a String with the query to fetch a specific event.
-     * Then call the Select method in OperationDAO.
      * @param   event_id: the id of the event.
      * @return  the event as an Event object, return null if the event is not found.
      */
@@ -162,6 +161,7 @@ public class EventDAO{
             }
         }
     }
+
     
     /**
      * Create a String with the query to fetch all events.
@@ -227,6 +227,82 @@ public class EventDAO{
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " EventDao.getEventAll(): ERROR unable to close prepared statement, " + e.toString());
                     throw new DataBaseException("Unable to retrieve events.");
+                }
+            }
+        }
+    }
+
+    /** Return the birth event of a person
+     *
+     * @param person_id : the person
+     * @param user_name : the associated user
+     * @return  : the event of the birth
+     * @throws DataBaseException
+     */
+    public Event getBirthEvent(String person_id, String user_name) throws  DataBaseException{
+        Event event = null;
+
+        ResultSet result = null;
+        PreparedStatement stmt = null;
+
+        String query = "SELECT * FROM events WHERE person_id = ? AND user_name = ? AND event_type =  ?";
+
+        try{
+            stmt = connection.prepareStatement(query);
+            stmt.setString(1, person_id);
+            stmt.setString(2, user_name);
+            stmt.setString(3, "birth");
+
+            result = stmt.executeQuery();
+
+            if(result.next()){
+                System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): event has been found");
+
+                event = new Event(result.getString("event_id"),
+                        result.getString("user_name"),
+                        result.getString("person_id"),
+                        result.getFloat("latitude"),
+                        result.getFloat("longitude"),
+                        result.getString("country"),
+                        result.getString("city"),
+                        result.getString("event_type"),
+                        result.getInt("year"));
+            }
+
+            if(event != null){
+                System.out.println(LocalTime.now() + " EventDAO.getBirthEvent() : Fetched event: \"" + event.getEventId() + "\"");
+                return event;
+            }
+            else{
+                System.out.println(LocalTime.now() + " EventDAO.getBirthEvent() : No event of type \"birth\" found");
+                return null;
+            }
+        }
+        catch(DataBaseException message){
+            System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): " + message.toString());
+            throw new DataBaseException(message.toString());
+        }
+        catch(Exception e){
+            System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR while retrieving event: " + e.toString());
+            throw new DataBaseException("Internal Error: unable to retrieve event.");
+        }
+        finally {
+            if(result != null){
+                try{
+                    stmt.close();
+                }
+                catch (Exception e){
+                    System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR unable to close prepared statement, " + e.toString());
+                    throw new DataBaseException("unable to get event");
+                }
+            }
+            if(stmt != null){
+                try{
+                    stmt.close();
+                }
+                catch (Exception e){
+                    System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR unable to close prepared statement, " + e.toString());
+                    throw new DataBaseException("unable to get event");
                 }
             }
         }

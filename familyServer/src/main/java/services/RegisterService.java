@@ -79,7 +79,14 @@ public class RegisterService{
                 throw new DataBaseException("Internal Error: something went wrong while connecting the user, user not registered");
             }
 
-            // Generate family tree for user.
+            db.commitAndCloseConnection(true);
+
+            System.out.println(LocalTime.now() + " RegisterService: call to FillService to generate tree.");
+            FillService fill_service = new FillService();
+            final int NUM_GENERATION = 4;
+            fill_service.fillUserTree(req.getUser_name(), NUM_GENERATION);
+
+            return new ConnectionResponse(token, new_person.getUserName(), new_person.getPersonId());
 
         }
         catch (DataBaseException message){
@@ -100,11 +107,9 @@ public class RegisterService{
             }
             catch (Exception e){
                 System.out.println(LocalTime.now() + " RegisterService: error while trying to close db connection: " + e.toString());
+                return new ErrorResponse("Internal Error while trying to close connection");
             }
         }
-
-
-        return null;
     }
     
 }

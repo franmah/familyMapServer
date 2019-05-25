@@ -3,7 +3,7 @@ package services;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
+import static org.junit.Assert.assertTrue;
 import java.time.LocalTime;
 import java.util.List;
 import dao.*;
@@ -12,8 +12,6 @@ import response.EventAllResponse;
 import response.EventResponse;
 import response.ErrorResponse;
 import response.Response;
-
-import static org.junit.Assert.assertTrue;
 
 
 public class EventServiceTest {
