@@ -26,6 +26,18 @@ public class RegisterRequest{
             
     }
 
+    @Override
+    public String toString() {
+        return "RegisterRequest{" +
+                "user_name='" + user_name + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", first_name='" + first_name + '\'' +
+                ", last_name='" + last_name + '\'' +
+                ", gender='" + gender + '\'' +
+                '}';
+    }
+
     public String getUser_name() {
         return user_name;
     }

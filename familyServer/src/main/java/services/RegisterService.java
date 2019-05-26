@@ -17,7 +17,8 @@ import models.*;
  * Handle DataBaseException.
  */
 public class RegisterService{
-    
+
+    OperationDAO db = null;
     
     public RegisterService(){}
     
@@ -29,7 +30,7 @@ public class RegisterService{
      * @return      Return a connexionResponse with the user id, name and token
      *              or errorResponse if there is a missing field or if the username is already taken
      */
-    public static Response registerNewUser(RegisterRequest req){
+    public Response registerNewUser(RegisterRequest req){
 
         // Check input
         if(req.getUser_name() == null || req.getPassword() == null || req.getFirst_name() == null ||
@@ -43,32 +44,20 @@ public class RegisterService{
             // Return error response (wrong gender)
         }
 
-        // Create user and person object
-        Person new_person = new Person(req.getUser_name(), req.getFirst_name(), req.getLast_name(), req.getGender());
-
-        User new_user = new User(req.getUser_name(), req.getPassword(), req.getEmail(), req.getFirst_name(),
-                                    req.getLast_name(), req.getGender(), new_person.getPersonId());
-
-        OperationDAO db = null;
         boolean commit = false;
 
         try {
             db = new OperationDAO();
             UserDAO udao = db.getUser_dao();
             PersonDAO pdao = db.getPerson_dao();
-
-            // Add user
-            if (!udao.addUser(new_user)) {
+/*
+            // Check if user is registered
+            if(udao.getUser(req.getUser_name()) != null){
                 System.out.println(LocalTime.now() + " RegisterService: username is already used");
                 return new ErrorResponse("The username is already used!");
-            }
+            }*/
 
-            // Add person
-            if (!pdao.addPerson(new_person)){
-                System.out.println(LocalTime.now() + " RegisterService: Error while trying to add Person object," +
-                                                        "person might already be in database while it shouldn't");
-                throw new DataBaseException("Internal Error: something went wrong while registering user.");
-            }
+            User new_user = generatePersonAndUser(req);
 
             // Login User : no need to check for input since the user was added above.
             System.out.println(LocalTime.now() + " RegisterService: connecting user...");
@@ -76,39 +65,66 @@ public class RegisterService{
 
             if(token == null){
                 System.out.println(LocalTime.now() + " RegisterService: Error: token came back null");
-                throw new DataBaseException("Internal Error: something went wrong while connecting the user, user not registered");
+                commit = false;
+                return  new ErrorResponse("Internal Error: something went wrong while connecting the user, user not registered");
             }
 
-            db.commitAndCloseConnection(true);
+            commit = true;
+            db.commitAndCloseConnection(commit);
+            db = null;
 
             System.out.println(LocalTime.now() + " RegisterService: call to FillService to generate tree.");
-            FillService fill_service = new FillService();
             final int NUM_GENERATION = 4;
+            FillService fill_service = new FillService();
             fill_service.fillUserTree(req.getUser_name(), NUM_GENERATION);
 
-            return new ConnectionResponse(token, new_person.getUserName(), new_person.getPersonId());
+            return new ConnectionResponse(token, new_user.getUserName(), new_user.getPersonId());
 
         }
         catch (DataBaseException message){
+            commit = false;
             return new ErrorResponse(message.toString());
         }
         catch (Exception e){
+            commit = false;
             return new ErrorResponse("Internal error: unable to register user.");
         }
         finally {
-            try {
+            if(db != null){
                 db.commitAndCloseConnection(commit);
-                if(commit){
-                    System.out.println(LocalTime.now() + " RegisterService: connection closed -> changes were committed");
-                }
-                else {
-                    System.out.println(LocalTime.now() + " RegisterService: connection closed -> changes were not committed");
-                }
             }
-            catch (Exception e){
-                System.out.println(LocalTime.now() + " RegisterService: error while trying to close db connection: " + e.toString());
-                return new ErrorResponse("Internal Error while trying to close connection");
+
+        }
+    }
+
+    private User generatePersonAndUser(RegisterRequest req) throws DataBaseException{
+        try {
+            // Create user and person object
+            Person new_person = new Person(req.getUser_name(), req.getFirst_name(), req.getLast_name(), req.getGender());
+
+            User new_user = new User(req.getUser_name(), req.getPassword(), req.getEmail(), req.getFirst_name(),
+                    req.getLast_name(), req.getGender(), new_person.getPersonId());
+
+
+            // Add user
+            if (!db.getUser_dao().addUser(new_user)) {
+                System.out.println(LocalTime.now() + " RegisterService: username is already used");
+                throw new DataBaseException("The username is already used!");
             }
+
+            // Add person
+            if (!db.getPerson_dao().addPerson(new_person)) {
+                System.out.println(LocalTime.now() + " RegisterService: Error while trying to add Person object," +
+                        "person might already be in database when it shouldn't");
+                throw new DataBaseException("Internal Error: something went wrong while registering user.");
+            }
+
+            return new_user;
+        }
+        catch (Exception e){
+            System.out.println(LocalTime.now() + " RegisterService.generatePersonAndUser(): Error: " + e.toString());
+            e.printStackTrace();
+            throw  new DataBaseException("Internal error: unable to register user.");
         }
     }
     
