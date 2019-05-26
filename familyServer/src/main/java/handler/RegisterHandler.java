@@ -25,9 +25,11 @@ public class RegisterHandler implements HttpHandler {
 
         try{
             if(exchange.getRequestMethod().toLowerCase().equals("post")) {
+
+                StreamHandler stream_handler = new StreamHandler();
+
                 // Get inputStream from request body
-                InputStream request_body = exchange.getRequestBody();
-                String data_json = readInputStream(request_body);
+                String data_json = stream_handler.readInputStream(exchange.getRequestBody());
                 //System.out.println(LocalTime.now() + " RegisterHandler: Json string retrieved: " + data_json);
 
                 // Process JSON
@@ -47,9 +49,8 @@ public class RegisterHandler implements HttpHandler {
                 System.out.println(LocalTime.now() + " RegisterHandler: sending response...");
                 exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 
-                OutputStream response_body = exchange.getResponseBody();
-                writeToOutputStream(response_json, response_body);
-                response_body.close();
+                stream_handler.writeToOutputStream(response_json, exchange.getResponseBody());
+                exchange.getResponseBody().close();
 
                 success = true;
                 System.out.println(LocalTime.now() + " RegisterHandler: response successfully sent!");

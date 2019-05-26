@@ -422,7 +422,7 @@ public class FillService{
             // Find child's birth date.
             Event child_birth = db.getEvent_dao().getBirthEvent(child.getPersonId(), user_name);
 
-            int year = child_birth.getYear() - ((rand.nextInt() % 20) + 16);
+            int year = child_birth.getYear() - ((Math.abs(rand.nextInt()) % 20) + 16);
             // 20 and 16 to have a relatively possible age of birth compared to the child.
 
             // Find random location
@@ -455,7 +455,8 @@ public class FillService{
             final int MAX_AGE = 90; // Range in which the random number can be.
 
             // Calendar.YEAR return the current year.
-            int year = Calendar.YEAR - (Math.abs(rand.nextInt() % MAX_AGE));
+            Calendar calendar = Calendar.getInstance();   // Gets the current date and time
+            int year = calendar.get(Calendar.YEAR) - (Math.abs(rand.nextInt() % MAX_AGE));
 
             // Find random location
             int location_index = Math.abs(rand.nextInt() % locations.getData().length);

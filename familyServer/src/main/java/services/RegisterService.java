@@ -25,7 +25,7 @@ public class RegisterService{
     /**
      * Create a Person and a new User (link the person_id to the user)
      * Log in the new user
-     * 
+     *
      * @param req   RegisterRequest containing the user info
      * @return      Return a connexionResponse with the user id, name and token
      *              or errorResponse if there is a missing field or if the username is already taken
@@ -35,13 +35,15 @@ public class RegisterService{
         // Check input
         if(req.getUser_name() == null || req.getPassword() == null || req.getFirst_name() == null ||
                 req.getLast_name() == null || req.getEmail() == null || req.getGender() == null){
-            // return error
+            System.out.println(LocalTime.now() + " RegisterService.registerNewUser(): Error: One of the parameter is null");
+            return new ErrorResponse("Error: one of the parameter is missing");
         }
 
         String gender_choice = "fm";
         String gender = req.getGender().toLowerCase();
-        if(gender.length() != 1 && !gender_choice.contains(gender)){
-            // Return error response (wrong gender)
+        if(gender.length() != 1 || !gender_choice.contains(gender)){
+            System.out.println(LocalTime.now() + " RegisterService.registerNewUser(): Error: gender input wrong.");
+            return new ErrorResponse("Error: enter \"f\" or \"m\" for gender");
         }
 
         boolean commit = false;
@@ -50,12 +52,13 @@ public class RegisterService{
             db = new OperationDAO();
             UserDAO udao = db.getUser_dao();
             PersonDAO pdao = db.getPerson_dao();
-/*
+
             // Check if user is registered
             if(udao.getUser(req.getUser_name()) != null){
                 System.out.println(LocalTime.now() + " RegisterService: username is already used");
+                commit = false;
                 return new ErrorResponse("The username is already used!");
-            }*/
+            }
 
             User new_user = generatePersonAndUser(req);
 
