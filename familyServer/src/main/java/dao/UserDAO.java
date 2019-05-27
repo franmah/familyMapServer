@@ -186,7 +186,11 @@ public class UserDAO{
       }
    }
 
-
+   /** delete EVERY user. (Does not delete related events and persons)
+    *
+    * @return
+    * @throws DataBaseException
+    */
    public boolean deleteUsers() throws  DataBaseException{
 
       PreparedStatement stmt = null;
@@ -202,6 +206,7 @@ public class UserDAO{
       }
       catch(Exception e){
          System.out.println(LocalTime.now() + " UserDAO.deleteUsers(): ERROR while deleting data from users: " + e.toString());
+         e.printStackTrace();
          throw new DataBaseException("Error while deleting data from users table");
       }
       finally {
@@ -211,6 +216,7 @@ public class UserDAO{
             }
             catch (Exception e){
                System.out.println(LocalTime.now() + " UserDao.deleteUser(): ERROR couldn't close prepared statement, " + e.toString());
+               e.printStackTrace();
                throw new DataBaseException("Unable to delete users");
             }
          }
@@ -219,5 +225,6 @@ public class UserDAO{
       System.out.println(LocalTime.now() + " UserDao.deleteUser(): data in users table cleared");
       return true;
    }
+
 
 }

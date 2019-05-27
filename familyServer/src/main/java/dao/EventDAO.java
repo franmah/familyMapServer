@@ -217,6 +217,7 @@ public class EventDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " EventDao.getEventAll(): ERROR unable to close result, " + e.toString());
+                    e.printStackTrace();
                     throw new DataBaseException("Unable to retrieve events.");
                 }
             }
@@ -226,17 +227,18 @@ public class EventDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " EventDao.getEventAll(): ERROR unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
                     throw new DataBaseException("Unable to retrieve events.");
                 }
             }
         }
     }
 
-    /** Return the birth event of a person
+    /** Return the birth event of a person.
      *
-     * @param person_id : the person
-     * @param user_name : the associated user
-     * @return  : the event of the birth
+     * @param person_id : the person.
+     * @param user_name : the associated user.
+     * @return  : the event of the birth.
      * @throws DataBaseException
      */
     public Event getBirthEvent(String person_id, String user_name) throws  DataBaseException{
@@ -284,6 +286,7 @@ public class EventDAO{
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR while retrieving event: " + e.toString());
+            e.printStackTrace();
             throw new DataBaseException("Internal Error: unable to retrieve event.");
         }
         finally {
@@ -308,6 +311,11 @@ public class EventDAO{
         }
     }
 
+    /** Clear data of "events" table.
+     *
+     * @return
+     * @throws DataBaseException
+     */
     public boolean deleteEvents() throws  DataBaseException{
         PreparedStatement stmt = null;
 
@@ -322,6 +330,7 @@ public class EventDAO{
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " EventDAO.deleteEvents(): ERROR while deleting data from events: " + e.toString());
+            e.printStackTrace();
             throw new DataBaseException("Error while deleting data from events table");
         }
         finally {
@@ -331,6 +340,7 @@ public class EventDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " EventDAO.deleteEvents(): ERROR Unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
                     throw new DataBaseException("Unable to delete events");
                 }
             }
@@ -338,5 +348,45 @@ public class EventDAO{
 
         System.out.println(LocalTime.now() + " EventDAO.deleteEvents(): data in events table cleared");
         return true;
+    }
+
+    /** Delete event(s) for user "user_name".
+     *
+     * @param user_name associated user.
+     * @throws DataBaseException
+     */
+    public void deleteUserFamilyEvents(String user_name) throws  DataBaseException{
+
+        PreparedStatement stmt = null;
+
+        try{
+            String query = "DELETE FROM events WHERE user_name = ?;";
+            stmt = connection.prepareStatement(query);
+            stmt.setString(1, user_name);
+            stmt.executeUpdate();
+
+            System.out.println(LocalTime.now() + " EventDAO.deleteUserFamilyEvents(): data in events table for user \"" + user_name + "\" cleared");
+        }
+        catch(DataBaseException message){
+            System.out.println(LocalTime.now() + " EventDAO.deleteUserFamilyEvents(): " + message.toString());
+            throw new DataBaseException(message.toString());
+        }
+        catch(Exception e){
+            System.out.println(LocalTime.now() + " EventDAO.deleteUserFamilyEvents(): ERROR while deleting data from events: " + e.toString());
+            e.printStackTrace();
+            throw new DataBaseException("Error while deleting data from events table");
+        }
+        finally {
+            if(stmt != null){
+                try{
+                    stmt.close();
+                }
+                catch (Exception e){
+                    System.out.println(LocalTime.now() + " EventDAO.deleteUserFamilyEvents(): ERROR Unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
+                    throw new DataBaseException("Unable to delete events for user: \"" + user_name + "\"");
+                }
+            }
+        }
     }
 }

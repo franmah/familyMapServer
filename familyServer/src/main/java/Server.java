@@ -4,12 +4,7 @@ import java.time.LocalTime;
 
 import com.sun.net.httpserver.*;
 
-import handler.ClearHandler;
-import handler.EventHandler;
-import handler.FileHandler;
-import handler.LoadHandler;
-import handler.PersonHandler;
-import handler.RegisterHandler;
+import handler.*;
 
 public class Server {
 
@@ -42,16 +37,15 @@ public class Server {
 
         /*** CONTEXT ***/
 
+
         server.createContext("/user/register", new RegisterHandler());
         server.createContext("/user/login", new LoadHandler());
         server.createContext("/clear", new ClearHandler());
-        server.createContext("/fill", new FileHandler());
+        server.createContext("/fill/", new FillHandler());
         server.createContext("/load", new LoadHandler());
-        server.createContext("/event", new EventHandler()); // use getRequestURI
+        server.createContext("/event", new EventHandler());
         server.createContext("/person", new PersonHandler());
         server.createContext("/", new FileHandler());
-
-        // Files.Coppy
 
         System.out.println(LocalTime.now() + " Server.run(): context(s) created, now starting server...");
 

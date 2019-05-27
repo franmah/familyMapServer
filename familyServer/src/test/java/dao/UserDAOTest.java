@@ -9,7 +9,7 @@ import java.util.Locale;
 
 import static org.junit.Assert.*;
 
-import models.User;
+import models.*;
 
 
 public class UserDAOTest {
@@ -58,7 +58,7 @@ public class UserDAOTest {
     }
 
     @Test
-    public void deletePass() throws  Exception{
+    public void deleteUsersPass() throws  Exception{
         UserDAO udao = db.getUser_dao();
 
         boolean success = false;
@@ -102,7 +102,7 @@ public class UserDAOTest {
     }
 
     @Test
-    public void connectUser(){
+    public void connectUserPass(){
         UserDAO udao = db.getUser_dao();
 
         User user = new User("test", "password", "test@test.com", "this",
@@ -120,4 +120,22 @@ public class UserDAOTest {
 
         assertTrue(success);
     }
+
+    @Test
+    public void connectUserFail(){
+        UserDAO udao = db.getUser_dao();
+
+        boolean success = false;
+        try{
+            udao.deleteUsers();
+            String str = udao.connectUser("test", "password");
+            if(str == null) { success = true; }
+        }
+        catch (Exception e){
+            success = true;
+        }
+
+        assertTrue(success);
+    }
+
 }

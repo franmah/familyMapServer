@@ -68,24 +68,6 @@ public class RegisterHandler implements HttpHandler {
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_SERVER_ERROR, 0);
             exchange.getResponseBody().close();
         }
-
-    }
-
-    private String readInputStream(InputStream is) throws  IOException{
-        StringBuilder final_string = new StringBuilder();
-        InputStreamReader reader = new InputStreamReader(is);
-        char[] buf = new char[1024];
-        int len;
-        while((len = reader.read(buf)) > 0){
-            final_string.append(buf, 0, len);
-        }
-        return final_string.toString();
-    }
-
-    private void writeToOutputStream(String str, OutputStream os) throws IOException{
-        OutputStreamWriter writer = new OutputStreamWriter(os);
-        writer.write(str);
-        writer.flush();
     }
 
 }

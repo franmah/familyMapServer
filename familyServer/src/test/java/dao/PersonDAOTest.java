@@ -204,4 +204,28 @@ public class PersonDAOTest {
         assertTrue(success);
     }
 
+    @Test
+    public void updatePersonParentsPass(){
+        try {
+            db.getPerson_dao().deletePersons();
+
+            Person person = new Person("test_person", "test_user", "first", "last", "f");
+
+            db.getPerson_dao().addPerson(person);
+
+            person.setFatherId("father");
+            person.setMotherId("mother");
+
+            db.getPerson_dao().updatePersonParents(person);
+
+            Person updated_person = db.getPerson_dao().getPerson("test_person", "test_user");
+
+            assertEquals(person.getFatherId(), updated_person.getFatherId());
+            assertEquals(person.getMotherId(), updated_person.getMotherId());
+        }
+        catch (Exception e){
+            assertTrue(false);
+        }
+    }
+
 }

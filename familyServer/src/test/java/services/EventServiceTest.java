@@ -21,6 +21,7 @@ public class EventServiceTest {
         OperationDAO db = new OperationDAO();
         db.getAutToken_dao().deleteTokens();
         db.getEvent_dao().deleteEvents();
+        db.getUser_dao().deleteUsers();
 
         db.getAutToken_dao().addToken(new AuthToken("test_token", "test_user"));
         db.getEvent_dao().addEvent(new Event("test_event", "test_user", "test_Event",
@@ -33,6 +34,7 @@ public class EventServiceTest {
         OperationDAO db = new OperationDAO();
         db.getAutToken_dao().deleteTokens();
         db.getEvent_dao().deleteEvents();
+        db.getUser_dao().deleteUsers();
         db.commitAndCloseConnection(true);
     }
 
@@ -188,4 +190,31 @@ public class EventServiceTest {
         assertTrue(success);
 
     }
+
+    @Test
+    // No fail test: if the use does not exist, the method will run the sql but simply won't delete anything
+    public void deleteUserFamilyEventsPass(){
+        boolean success = false;
+        OperationDAO db = null;
+
+        try{
+
+            db = new OperationDAO();
+            db.getEvent_dao().deleteUserFamilyEvents("user_name");
+
+            success = true;
+        }
+        catch (Exception e){
+            success = false;
+        }
+        finally {
+            if(db != null) { db.commitAndCloseConnection(false);}
+        }
+
+        assertTrue(success);
+
+    }
+
+
+
 }

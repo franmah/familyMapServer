@@ -23,7 +23,7 @@ public class FileHandler implements HttpHandler{
         try{
             if(exchange.getRequestMethod().toLowerCase().equals("get")){
 
-                // Get the path of the url
+                // Get URL path
                 String path = exchange.getRequestURI().getPath();
                 System.out.println(LocalTime.now() + " FileHandler: URI path: " + path);
 

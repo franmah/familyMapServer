@@ -272,4 +272,84 @@ public class PersonDAO{
 
     }
 
+    /** Delete every person with associated "user_name" including the user's person object. Assume the user is registered.
+     *
+     * @param user_name associated user.
+     * @throws DataBaseException
+     */
+    public void deleteUserFamily(String user_name) throws DataBaseException{
+
+        PreparedStatement stmt = null;
+
+        try{
+            String query = "DELETE FROM persons WHERE user_name = ?;";
+            stmt = connection.prepareStatement(query);
+            stmt.setString(1, user_name);
+            stmt.executeUpdate();
+
+            System.out.println(LocalTime.now() + " PersonDao.deleteUserFamily(): data in persons table for user \"" + user_name + "\" cleared");
+        }
+        catch(DataBaseException message){
+            System.out.println(LocalTime.now() + " PersonDao.deleteUserFamily(): " + message.toString());
+            throw new DataBaseException(message.toString());
+        }
+        catch(Exception e){
+            System.out.println(LocalTime.now() + " PersonDAO.deleteUserFamily(): ERROR while deleting data from persons: " + e.toString());
+            e.printStackTrace();
+            throw new DataBaseException("Error while deleting data from persons table for user \"" + user_name + "\"");
+        }
+        finally {
+            if(stmt != null){
+                try{
+                    stmt.close();
+                }
+                catch (Exception e){
+                    System.out.println(LocalTime.now() + " PersonDao.deleteUserPerson(): ERROR couldn't close prepared statement, " + e.toString());
+                    throw new DataBaseException("Error while delete people");
+                }
+            }
+        }
+    }
+
+    /** update the parents of a person.
+     *
+     * @param person the person to update
+     */
+    public void updatePersonParents(Person person){
+
+        PreparedStatement stmt = null;
+
+        try{
+            String query = "UPDATE persons SET father_id = ?, mother_id = ? WHERE person_id = ?;";
+            stmt = connection.prepareStatement(query);
+            stmt.setString(1, person.getFatherId());
+            stmt.setString(2, person.getMotherId());
+            stmt.setString(3, person.getPersonId());
+            stmt.executeUpdate();
+
+            System.out.println(LocalTime.now() + " PersonDao.updatePersonParents(): person updated");
+        }
+        catch(DataBaseException message){
+            System.out.println(LocalTime.now() + " PersonDao.updatePersonParents(): " + message.toString());
+            throw new DataBaseException(message.toString());
+        }
+        catch(Exception e){
+            System.out.println(LocalTime.now() + " PersonDAO.updatePersonParents(): ERROR while deleting data from persons: " + e.toString());
+            e.printStackTrace();
+            throw new DataBaseException("Error while updating person");
+        }
+        finally {
+            if(stmt != null){
+                try{
+                    stmt.close();
+                }
+                catch (Exception e){
+                    System.out.println(LocalTime.now() + " PersonDao.updatePersonParents(): ERROR unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
+                    throw new DataBaseException("Error while delete people");
+                }
+            }
+        }
+    }
+
 }

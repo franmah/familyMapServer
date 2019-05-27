@@ -23,7 +23,8 @@ public class RegisterService{
     public RegisterService(){}
     
     /**
-     * Create a Person and a new User (link the person_id to the user)
+     * Create a new User, connect him/her and generate family tree for four generations
+     * The person object linked to the user is created by the FillService (in charge of creating the tree)
      * Log in the new user
      *
      * @param req   RegisterRequest containing the user info
@@ -79,7 +80,13 @@ public class RegisterService{
             System.out.println(LocalTime.now() + " RegisterService: call to FillService to generate tree.");
             final int NUM_GENERATION = 4;
             FillService fill_service = new FillService();
-            fill_service.fillUserTree(req.getUser_name(), NUM_GENERATION);
+            Response response = fill_service.fillUserTree(req.getUser_name(), NUM_GENERATION);
+
+            if(response instanceof ErrorResponse){
+                return response;
+            }
+
+            // Get the Person object for the user (to get it's id)
 
             return new ConnectionResponse(token, new_user.getUserName(), new_user.getPersonId());
 

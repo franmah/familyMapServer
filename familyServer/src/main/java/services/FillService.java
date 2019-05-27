@@ -2,7 +2,6 @@ package services;
 
 import java.io.File;
 import java.io.FileReader;
-import java.nio.file.Paths;
 import java.time.LocalTime;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -12,7 +11,6 @@ import java.util.Random;
 import dao.DataBaseException;
 import dao.OperationDAO;
 import dao.PersonDAO;
-import response.EventAllResponse;
 import response.Response;
 import response.SuccessResponse;
 import response.ErrorResponse;
@@ -178,7 +176,7 @@ public class FillService{
         // Check if the static call to load objects from json files worked.
         if(locations == null || female_names == null || males_names == null
             || last_names == null){
-            System.out.println(LocalTime.now() + " FillService.fillUserTree(): Error: json files not loaded into objects.");
+            System.out.println(LocalTime.now() + " FillService.fillUserTree(): Error: json files for locations and names not loaded into objects.");
             return new ErrorResponse("Internal Error: unable to generate family tree.");
         }
 
@@ -190,20 +188,26 @@ public class FillService{
         try {
             db = new OperationDAO();
 
-            // Check if user is registered
+            // Check if user is registered, if he is: erase his data, else: return an error.
             User user = db.getUser_dao().getUser(user_name);
             if (user == null) {
                 System.out.println(LocalTime.now() + " FillService.fillUserTree(): User \"" + user_name + "\" is not registered.");
                 return new ErrorResponse("User not registered");
             }
-            System.out.println(LocalTime.now() + " FillService.fillUserTree(): User \"" + user_name + "\" is registered.");
+            else{
+                System.out.println("FillService.fillUserTree(): a user \"" + user_name + "\" has been found, deleting user's previous data...");
+                renewUserInfo(user);
+            }
 
+            // Generate birth for the user. Ancestor's events will be created based on this event's year.
             generateUserBirth(user);
             num_events++;
 
-
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): generating family tree...");
-            generateTree(db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName()), user_name, num_generations, 1);
+            Person user_person = generateTree(db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName()), user_name, num_generations, 1);
+
+            // Update user with it's new parents
+            db.getPerson_dao().updatePersonParents(user_person);
 
             commit = true;
 
@@ -233,10 +237,10 @@ public class FillService{
      * @param   num_generations: number of generations to generate.
      * @param   current_generation: number giving the generation it the method is creating.
      */
-    private void generateTree(Person child, String user_name, int num_generations, int current_generation) throws DataBaseException{
+    private Person generateTree(Person child, String user_name, int num_generations, int current_generation) throws DataBaseException{
         if(current_generation > num_generations){
             System.out.println(LocalTime.now() + " FillService.generateTree(): returning");
-            return;
+            return null;
         }
         System.out.println(LocalTime.now() + " FillService.generateTree(): generating generation #" + current_generation + "/" + num_generations);
 
@@ -255,7 +259,6 @@ public class FillService{
             generateRandomEvent(mother.getPersonId(), user_name);
             num_events++;
             System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated for the mother");
-
 
             // recursive call
             generateTree(mother, user_name, num_generations, ++current_generation);
@@ -297,6 +300,7 @@ public class FillService{
             child.setFatherId(father.getPersonId());
 
             System.out.println(LocalTime.now() + " FillService.generateTree(): returning");
+            return child;
         }
         catch (DataBaseException message){
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): Error: " + message.toString());
@@ -474,5 +478,24 @@ public class FillService{
             e.printStackTrace();
             throw new DataBaseException("Internal error while generating user's birth event");
         }
+    }
+
+    /** Delete data related to user (Persons and Events) and recreate a new person for tha user, using the same person id.
+     *
+     * @param user
+     */
+    private void renewUserInfo(User user){
+        assert db != null;
+
+        // Save user's person object
+        Person person = db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName());
+
+        // Delete any previous data related to the user
+        db.getPerson_dao().deleteUserFamily(user.getUserName());
+        db.getEvent_dao().deleteUserFamilyEvents(user.getUserName());
+
+        // Add the user's person object back into the database
+        db.getPerson_dao().addPerson(person);
+
     }
 }

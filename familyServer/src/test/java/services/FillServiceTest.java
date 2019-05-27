@@ -14,6 +14,15 @@ import static org.junit.Assert.*;
 
 public class FillServiceTest {
 
+    @Before
+    public void setUp(){
+        OperationDAO db = new OperationDAO();
+        db.getUser_dao().deleteUsers();
+        db.getEvent_dao().deleteEvents();
+        db.getPerson_dao().deletePersons();
+        db.getAutToken_dao().deleteTokens();
+        db.commitAndCloseConnection(true);
+    }
     @After
     public void tearDown(){
         OperationDAO db = new OperationDAO();
@@ -48,14 +57,14 @@ public class FillServiceTest {
             }
 
             if(response instanceof ErrorResponse){
-                success = true;
+                success = false;
             }
 
         }
         catch (Exception e){
             System.out.println(e.toString());
             e.printStackTrace();
-            success = true;
+            success = false;
         }
 
         assertTrue(success);
