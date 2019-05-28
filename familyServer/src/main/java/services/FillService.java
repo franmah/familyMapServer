@@ -168,6 +168,7 @@ public class FillService{
      * @return  SuccessResponse or ErrorResponse with an explanation message.
      */
     public Response fillUserTree(String user_name, int num_generations){
+        System.out.println("TEST***********: username " + user_name + ", num: " + num_generations);
         if(user_name == null || num_generations < 0) {
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): Error: user_name null or num_generation < 0.");
             return new ErrorResponse("Wrong information");

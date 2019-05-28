@@ -37,7 +37,7 @@ public class RegisterHandler implements HttpHandler {
                 RegisterRequest register_request = gson.fromJson(data_json, RegisterRequest.class);
                 //System.out.println(LocalTime.now() + " Json request received: " + register_request.toString());
 
-                // Proceed to RegisterService
+                // Call RegisterService
                 System.out.println(LocalTime.now() + " RegisterHandler: calling RegisterService...");
                 RegisterService register_service = new RegisterService();
                 Response response = register_service.registerNewUser(register_request);
@@ -62,7 +62,7 @@ public class RegisterHandler implements HttpHandler {
             }
         }
         catch (Exception e){
-            System.out.println(LocalTime.now() + " FileHandler: Error: " + e.toString());
+            System.out.println(LocalTime.now() + " RegisterHandler: Error: " + e.toString());
             e.printStackTrace();
 
             exchange.sendResponseHeaders(HttpURLConnection.HTTP_SERVER_ERROR, 0);

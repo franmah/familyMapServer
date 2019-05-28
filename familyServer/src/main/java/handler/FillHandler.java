@@ -4,8 +4,13 @@ import java.io.*;
 import java.net.*;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.List;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.*;
+
+import response.Response;
+import services.FillService;
 
 
 public class FillHandler implements HttpHandler{
@@ -16,14 +21,58 @@ public class FillHandler implements HttpHandler{
     public void handle(HttpExchange exchange) throws IOException{
         System.out.println(LocalTime.now() + " FillHandler: context \"/fill/...\" called");
 
-        // Get the path of the url
-        String path = exchange.getRequestURI().getPath();
-        System.out.println(LocalTime.now() + " FileHandler: URI path: " + path);
+        boolean success = false;
 
-        // Parse the URL (first command is always the name of the service/handler)
-        path = path.substring(1, path.length()); // Remove the first "/"
-        String[] commands = path.split("/");
-        System.out.println(LocalTime.now() + " FillHandler: commands: " + Arrays.toString(commands));
+        try{
+            if(exchange.getRequestMethod().toLowerCase().equals("post")) {
+                // Get user_name and num_generations from URL
+                String user_name = null;
+                int num_generations = 0;
+
+                UrlParser url_parser = new UrlParser();
+                String[] commands = url_parser.parseFillUrl(exchange.getRequestURI().getPath());
+                user_name = commands[1];
+                num_generations = Integer.parseInt(commands[2]);
+                System.out.println(user_name + num_generations);
+
+
+                // Call FillService
+                System.out.println(LocalTime.now() + " FillHandler: calling FillService...");
+                FillService fill_service = new FillService();
+                Response response = fill_service.fillUserTree(user_name, num_generations);
+
+                // Return response
+                System.out.println(LocalTime.now() + " FillHandler: sending response...");
+                Gson gson = new Gson();
+                String response_json = gson.toJson(response);
+
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+
+                StreamHandler stream_handler = new StreamHandler();
+                stream_handler.writeToOutputStream(response_json, exchange.getResponseBody());
+                exchange.getResponseBody().close();
+
+                success = true;
+
+                System.out.println(LocalTime.now() + " FillHandler: response successfully sent");
+
+            }
+
+            if(!success){
+                exchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+                exchange.getResponseBody().close();
+            }
+
+        }
+        catch(Exception e){
+            System.out.println(LocalTime.now() + " FillHandler: Error: " + e.toString());
+            e.printStackTrace();
+
+            exchange.sendResponseHeaders(HttpURLConnection.HTTP_SERVER_ERROR, 0);
+            exchange.getResponseBody().close();
+        }
+
 
     }
+
 }
