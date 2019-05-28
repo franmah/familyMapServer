@@ -15,7 +15,7 @@ public class Event{
     private float longitude = 0;
     private String country = null;
     private String city = null;
-    private String type = null;
+    private String event_type = null;
     private int year = 0;
 
     public Event(){}
@@ -32,12 +32,12 @@ public class Event{
             this.longitude = longitude;
             this.country = country;
             this.city = city;
-            this.type = type;
+            this.event_type = type;
             this.year = year;
         }
 
     public Event(String event_id, String user_name, String person_id, float latitude,
-                 float longitude, String country, String city, String type, int year){
+                 float longitude, String country, String city, String event_type, int year){
         this.event_id = event_id;
         this.user_name = user_name;
         this.person_id = person_id;
@@ -45,9 +45,10 @@ public class Event{
         this.longitude = longitude;
         this.country = country;
         this.city = city;
-        this.type = type;
+        this.event_type = event_type;
         this.year = year;
     }
+    
     public String getEventId(){return event_id;}
     public String getUserName(){return user_name;}
     public String getPersonId(){return person_id;}
@@ -55,7 +56,7 @@ public class Event{
     public float    getLongitude(){return longitude;}
     public String getCountry(){return country;}
     public String getCity(){return city;}
-    public String getType(){return type;}
+    public String getEvent_type(){return event_type;}
     public int getYear(){return year;}
 
     @Override
@@ -71,11 +72,11 @@ public class Event{
                 Objects.equals(person_id, event.person_id) &&
                 Objects.equals(getCountry(), event.getCountry()) &&
                 Objects.equals(getCity(), event.getCity()) &&
-                Objects.equals(getType(), event.getType());
+                Objects.equals(getEvent_type(), event.getEvent_type());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(event_id, user_name, person_id, getLatitude(), getLongitude(), getCountry(), getCity(), getType(), getYear());
+        return Objects.hash(event_id, user_name, person_id, getLatitude(), getLongitude(), getCountry(), getCity(), getEvent_type(), getYear());
     }
 }

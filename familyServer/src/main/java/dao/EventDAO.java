@@ -3,7 +3,6 @@ package dao;
 import models.Event;
 import java.sql.*;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -34,13 +33,11 @@ public class EventDAO{
             return false;
         }
 
-        // Create update statement:
         String query = "INSERT INTO events VALUES(?,?,?,?,?,?,?,?,?);";
 
         PreparedStatement stmt = null;
 
         try{
-
             stmt = connection.prepareStatement(query);
 
             stmt.setString(1, event.getEventId());
@@ -50,7 +47,7 @@ public class EventDAO{
             stmt.setFloat(5, event.getLongitude());
             stmt.setString(6, event.getCountry());
             stmt.setString(7, event.getCity());
-            stmt.setString(8, event.getType());
+            stmt.setString(8, event.getEvent_type());
             stmt.setInt(9, event.getYear());
 
             stmt.executeUpdate();
@@ -75,6 +72,7 @@ public class EventDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " eventDAO.addEvent(): ERROR unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
                     throw new DataBaseException("Internal error: unable to add event");
                 }
             }
@@ -138,26 +136,18 @@ public class EventDAO{
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " EventDAO.getEvent(): ERROR while retrieving data from events: " + e.toString());
+            e.printStackTrace();
             throw new DataBaseException("Internal Error: unable to access event.");
         }
         finally {
-            if(result != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " EventDAO.getEvent(): ERROR unable to close prepared statement, " + e.toString());
-                    throw new DataBaseException("unable to get event");
-                }
+            try {
+                if (result != null) { stmt.close(); }
+
+                if (stmt != null) { stmt.close(); }
             }
-            if(stmt != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " EventDAO.getEvent(): ERROR unable to close prepared statement, " + e.toString());
+            catch (Exception e) {
+                    System.out.println(LocalTime.now() + " EventDAO.getEvent(): ERROR unable to close resources, " + e.toString());
                     throw new DataBaseException("unable to get event");
-                }
             }
         }
     }
@@ -168,9 +158,9 @@ public class EventDAO{
      * Then Call the Select method in OperationDAO.
      * @return  an array containing the events, as Event objects, fetched from the database.
      */
-    public List<Event> getEventAll(String user_name) throws DataBaseException {
+    public ArrayList<Event> getEventAll(String user_name) throws DataBaseException {
 
-        List<Event> events = new ArrayList<>();
+        ArrayList<Event> events = new ArrayList<>();
         Event event = null;
 
         ResultSet result = null;
@@ -211,25 +201,19 @@ public class EventDAO{
             throw new DataBaseException("Error while getting data from events table");
         }
         finally {
-            if(result != null){
-                try{
+            try {
+                if (result != null) {
                     result.close();
                 }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " EventDao.getEventAll(): ERROR unable to close result, " + e.toString());
-                    e.printStackTrace();
-                    throw new DataBaseException("Unable to retrieve events.");
-                }
-            }
-            if(stmt != null){
-                try{
+
+                if (stmt != null) {
                     stmt.close();
                 }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " EventDao.getEventAll(): ERROR unable to close prepared statement, " + e.toString());
-                    e.printStackTrace();
-                    throw new DataBaseException("Unable to retrieve events.");
-                }
+            } catch (Exception e) {
+                System.out.println(LocalTime.now() + " EventDao.getEventAll(): ERROR unable to close resources, " + e.toString());
+                e.printStackTrace();
+                throw new DataBaseException("Unable to retrieve events.");
+
             }
         }
     }
@@ -290,23 +274,14 @@ public class EventDAO{
             throw new DataBaseException("Internal Error: unable to retrieve event.");
         }
         finally {
-            if(result != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR unable to close prepared statement, " + e.toString());
-                    throw new DataBaseException("unable to get event");
-                }
+            try {
+                if (result != null) { stmt.close(); }
+
+                if (stmt != null) { stmt.close(); }
             }
-            if(stmt != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR unable to close prepared statement, " + e.toString());
-                    throw new DataBaseException("unable to get event");
-                }
+            catch (Exception e) {
+                System.out.println(LocalTime.now() + " EventDAO.getBirthEvent(): ERROR unable to close resources, " + e.toString());
+                throw new DataBaseException("unable to retrieve event");
             }
         }
     }
@@ -317,12 +292,18 @@ public class EventDAO{
      * @throws DataBaseException
      */
     public boolean deleteEvents() throws  DataBaseException{
+
+        String query = "DELETE FROM events;";
+
         PreparedStatement stmt = null;
 
         try{
-            String query = "DELETE FROM events;";
+
             stmt = connection.prepareStatement(query);
             stmt.executeUpdate();
+
+            System.out.println(LocalTime.now() + " EventDAO.deleteEvents(): data in events table cleared");
+            return true;
         }
         catch(DataBaseException message){
             System.out.println(LocalTime.now() + " EventDAO.deleteEvents(): " + message.toString());
@@ -345,9 +326,6 @@ public class EventDAO{
                 }
             }
         }
-
-        System.out.println(LocalTime.now() + " EventDAO.deleteEvents(): data in events table cleared");
-        return true;
     }
 
     /** Delete event(s) for user "user_name".

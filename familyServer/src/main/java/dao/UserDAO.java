@@ -4,6 +4,7 @@ import models.User;
 import models.AuthToken;
 import java.time.LocalTime;
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Perform database operation for users
@@ -127,7 +128,7 @@ public class UserDAO{
             }
             catch (Exception e){
                System.out.println(LocalTime.now() + " UserDao.getUser(): ERROR couldn't close prepared statement, " + e.toString());
-               throw new DataBaseException("Couldn't get user");
+               throw new DataBaseException("Unable to retrieve user");
             }
          }
          if(stmt != null){
@@ -136,7 +137,76 @@ public class UserDAO{
             }
             catch (Exception e){
                System.out.println(LocalTime.now() + " UserDao.getUser(): ERROR couldn't close prepared statement, " + e.toString());
-               throw new DataBaseException("Couldn't get user");
+               throw new DataBaseException("Unable to retrieve user");
+            }
+         }
+      }
+   }
+
+   /** Return an ArrayList with every user in the database.
+    *
+    * @return ArrayList of users
+    * @throws DataBaseException
+    */
+   public ArrayList<User> getUserAll() throws  DataBaseException{
+      ArrayList<User> users = new ArrayList<>();
+      User usr = null;
+
+      ResultSet result = null;
+      PreparedStatement stmt = null;
+
+      String query = "SELECT * FROM users";
+
+      try{
+         stmt = connection.prepareStatement(query);
+
+         result = stmt.executeQuery();
+
+         while(result.next()){
+            System.out.println(LocalTime.now() + " UserDAO.getUserAll(): User has been found");
+
+            usr = new User(result.getString("user_name"),
+                    result.getString("password"),
+                    result.getString("email"),
+                    result.getString("first_name"),
+                    result.getString("last_name"),
+                    result.getString("gender"),
+                    result.getString("person_id"));
+
+            users.add(usr);
+         }
+
+         return users;
+
+      }
+      catch(DataBaseException message){
+         System.out.println(LocalTime.now() + " UserDao.getUsersAll(): " + message.toString());
+         throw new DataBaseException(message.toString());
+      }
+      catch(Exception e){
+         System.out.println(LocalTime.now() + " UserDAO.getUsersAll(): ERROR while retrieve users: " + e.toString());
+         e.printStackTrace();
+         throw new DataBaseException("Unable to retrieve users");
+      }
+      finally {
+         if(result != null){
+            try{
+               stmt.close();
+            }
+            catch (Exception e){
+               System.out.println(LocalTime.now() + " UserDao.getUserAll(): ERROR couldn't close prepared statement, " + e.toString());
+               e.printStackTrace();
+               throw new DataBaseException("Unable to retrieve users");
+            }
+         }
+         if(stmt != null){
+            try{
+               stmt.close();
+            }
+            catch (Exception e){
+               System.out.println(LocalTime.now() + " UserDao.getUserAll(): ERROR Unable to close prepared statement, " + e.toString());
+               e.printStackTrace();
+               throw new DataBaseException("Unable to retrieve user");
             }
          }
       }

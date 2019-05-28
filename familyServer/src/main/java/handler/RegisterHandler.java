@@ -28,11 +28,9 @@ public class RegisterHandler implements HttpHandler {
 
                 StreamHandler stream_handler = new StreamHandler();
 
-                // Get inputStream from request body
+                // Create RegisterRequest
                 String data_json = stream_handler.readInputStream(exchange.getRequestBody());
                 //System.out.println(LocalTime.now() + " RegisterHandler: Json string retrieved: " + data_json);
-
-                // Process JSON
                 Gson gson = new Gson();
                 RegisterRequest register_request = gson.fromJson(data_json, RegisterRequest.class);
                 //System.out.println(LocalTime.now() + " Json request received: " + register_request.toString());

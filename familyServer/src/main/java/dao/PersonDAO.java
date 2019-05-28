@@ -77,7 +77,6 @@ public class PersonDAO{
                 }
             }
         }
-
     }
 
     /**
@@ -130,7 +129,6 @@ public class PersonDAO{
             }
 
             return person;
-
         }
         catch(DataBaseException message){
             System.out.println(LocalTime.now() + " personDao.getPerson(): " + message.toString());
@@ -138,26 +136,17 @@ public class PersonDAO{
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " personDAO.getPerson(): ERROR while getting data from person: " + e.toString());
-            throw new DataBaseException("Error while getting data from persons table");
+            throw new DataBaseException("Error while retrieving data from persons table");
         }
         finally {
-            if(result != null){
-                try{
-                    result.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " personDao.getPerson(): ERROR couldn't close result, " + e.toString());
-                    throw new DataBaseException("Couldn't get person");
-                }
+            try {
+                if (result != null) { result.close(); }
+
+                if (stmt != null) { stmt.close(); }
             }
-            if(stmt != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " personDao.getPerson(): ERROR couldn't close prepared statement, " + e.toString());
-                    throw new DataBaseException("Couldn't get person");
-                }
+            catch (Exception e) {
+                System.out.println(LocalTime.now() + " personDao.getPerson(): ERROR couldn't close resources, " + e.toString());
+                throw new DataBaseException("Unable to retrieve person");
             }
         }
     }
@@ -169,10 +158,10 @@ public class PersonDAO{
      * 
      * @return  An array with every Person fetched.
      */
-    public List<Person> getPersonAll(String user_name) throws DataBaseException{
+    public ArrayList<Person> getPersonAll(String user_name) throws DataBaseException{
         assert user_name != null : "PersondAO.getPersonAll(): user_name is null";
 
-        List<Person> people = new ArrayList<>();
+        ArrayList<Person> people = new ArrayList<>();
         Person person = null;
 
         ResultSet result = null;
@@ -210,26 +199,17 @@ public class PersonDAO{
         catch(Exception e){
             System.out.println(LocalTime.now() + " personDAO.getPersonAll(): ERROR while retrieving data from person table. " + e.toString());
             e.printStackTrace();
-            throw new DataBaseException("Error while getting data from persons table");
+            throw new DataBaseException("Error while retrieving data from persons table");
         }
         finally {
-            if(result != null){
-                try{
-                    result.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " personDao.getPersonAll(): ERROR couldn't close result, " + e.toString());
-                    throw new DataBaseException("Couldn't retrieve people.");
-                }
+            try {
+                if (result != null) { result.close(); }
+
+                if (stmt != null) { stmt.close(); }
             }
-            if(stmt != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " personDao.getPersonAll(): ERROR couldn't close prepared statement, " + e.toString());
-                    throw new DataBaseException("Couldn't retrieve people.");
-                }
+            catch (Exception e) {
+                System.out.println(LocalTime.now() + " personDao.getPersonAll(): ERROR unable to close resources, " + e.toString());
+                throw new DataBaseException("Unable to retrieve people.");
             }
         }
     }
@@ -241,11 +221,11 @@ public class PersonDAO{
 
         PreparedStatement stmt = null;
 
+        String query = "DELETE FROM persons;";
+
         try{
-            String query = "DELETE FROM persons;";
             stmt = connection.prepareStatement(query);
             stmt.executeUpdate();
-
 
             System.out.println(LocalTime.now() + " PersonDao.deletePerson(): data in persons table cleared");
             return true;
@@ -264,8 +244,8 @@ public class PersonDAO{
                     stmt.close();
                 }
                 catch (Exception e){
-                    System.out.println(LocalTime.now() + " PersonDao.deletePerson(): ERROR couldn't close prepared statement, " + e.toString());
-                    throw new DataBaseException("Couldn't add person");
+                    System.out.println(LocalTime.now() + " PersonDao.deletePersons(): ERROR couldn't close prepared statement, " + e.toString());
+                    throw new DataBaseException("Unable to delete people");
                 }
             }
         }
@@ -281,8 +261,9 @@ public class PersonDAO{
 
         PreparedStatement stmt = null;
 
+        String query = "DELETE FROM persons WHERE user_name = ?;";
+
         try{
-            String query = "DELETE FROM persons WHERE user_name = ?;";
             stmt = connection.prepareStatement(query);
             stmt.setString(1, user_name);
             stmt.executeUpdate();
@@ -305,7 +286,7 @@ public class PersonDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " PersonDao.deleteUserPerson(): ERROR couldn't close prepared statement, " + e.toString());
-                    throw new DataBaseException("Error while delete people");
+                    throw new DataBaseException("Unable to delete people");
                 }
             }
         }
@@ -319,8 +300,9 @@ public class PersonDAO{
 
         PreparedStatement stmt = null;
 
+        String query = "UPDATE persons SET father_id = ?, mother_id = ? WHERE person_id = ?;";
+
         try{
-            String query = "UPDATE persons SET father_id = ?, mother_id = ? WHERE person_id = ?;";
             stmt = connection.prepareStatement(query);
             stmt.setString(1, person.getFatherId());
             stmt.setString(2, person.getMotherId());
@@ -346,7 +328,7 @@ public class PersonDAO{
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " PersonDao.updatePersonParents(): ERROR unable to close prepared statement, " + e.toString());
                     e.printStackTrace();
-                    throw new DataBaseException("Error while delete people");
+                    throw new DataBaseException("Error while updating person");
                 }
             }
         }

@@ -52,9 +52,8 @@ public class RegisterService{
         try {
             db = new OperationDAO();
             UserDAO udao = db.getUser_dao();
-            PersonDAO pdao = db.getPerson_dao();
 
-            // Check if user is registered
+            // Check if user is not already registered
             if(udao.getUser(req.getUser_name()) != null){
                 System.out.println(LocalTime.now() + " RegisterService: username is already used");
                 commit = false;
@@ -77,16 +76,15 @@ public class RegisterService{
             db.commitAndCloseConnection(commit);
             db = null;
 
+            // Generate user family tree
             System.out.println(LocalTime.now() + " RegisterService: call to FillService to generate tree.");
             final int NUM_GENERATION = 4;
             FillService fill_service = new FillService();
             Response response = fill_service.fillUserTree(req.getUser_name(), NUM_GENERATION);
 
             if(response instanceof ErrorResponse){
-                return response;
+                return response; // If FillService didn't work properly
             }
-
-            // Get the Person object for the user (to get it's id)
 
             return new ConnectionResponse(token, new_user.getUserName(), new_user.getPersonId());
 

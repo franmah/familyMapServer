@@ -49,7 +49,7 @@ public class EventService{
 
             if(event != null){
                 return new EventResponse(event.getEventId(), event.getUserName(), event.getPersonId(), event.getLatitude(),
-                        event.getLongitude(), event.getCountry(), event.getCity(), event.getType(), event.getYear());
+                        event.getLongitude(), event.getCountry(), event.getCity(), event.getEvent_type(), event.getYear());
             }
             else{
                 System.out.println(LocalTime.now() + " EventService.getEvent(): Event object came back null");

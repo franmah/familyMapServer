@@ -18,8 +18,6 @@ public class User{
     
     public User(){}
 
-
-
     public User(String user_name, String password, String email,
                 String first_name, String last_name,
                 String gender, String person_id){

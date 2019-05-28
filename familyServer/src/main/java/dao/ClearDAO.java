@@ -11,9 +11,9 @@ public class ClearDAO{
     public ClearDAO(){}
     
     /**
-     * Clear the data base. ClearDAO is not classed through OperationDAO like other DAO classes.
+     * Clear the data base. ClearDAO is not connected to the database through OperationDAO like other DAO classes.
      * ClearDAO has it's own instance of OperationDAO, using it along an OperationDAO object will block the
-     * database!
+     * database!(due to multiple connections)
      * @return  true if database is deleted, else throw an error.
      */
     public boolean clearDataBase() throws DataBaseException{
@@ -38,7 +38,8 @@ public class ClearDAO{
         }
         catch (Exception e){
             commit = false;
-            System.out.println(LocalTime.now() + " ClearDAO: Error while clearing database");
+            System.out.println(LocalTime.now() + " ClearDAO: Error : " + e.toString());
+            e.printStackTrace();
             throw new DataBaseException("Internal Error: Unable to clear database");
         }
         finally {
@@ -53,6 +54,7 @@ public class ClearDAO{
             }
             catch (Exception e){
                 System.out.println(LocalTime.now() + " ClearDAO: Error unable to close connection.");
+                e.printStackTrace();
                 throw new DataBaseException("Internal Error: Unable to clear database");
             }
         }

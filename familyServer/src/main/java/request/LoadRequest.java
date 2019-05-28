@@ -1,5 +1,7 @@
 package request;
 
+import java.util.ArrayList;
+
 import models.*;
 
 /**
@@ -8,28 +10,39 @@ import models.*;
  */
 public class LoadRequest{
     
-    private User[] users = null;
-    private Person[] people = null;
-    private Event[] events = null;
+    private ArrayList<User> users = null;
+    private ArrayList<Person> persons = null;
+    private ArrayList<Event> events = null;
     
     public LoadRequest(){}
     
-    public LoadRequest(User[] users, Person[] people, Event[] events){
+    public LoadRequest(ArrayList<User> users, ArrayList<Person> persons, ArrayList<Event> events){
         this.users = users;
-        this.people = people;
+        this.persons = persons;
         this.events = events;
-    }      
-    
-    public void addUser(User user){ 
-        
     }
-    
-    public void addPerson(Person person){
-        
+
+    public ArrayList<User> getUsers() {
+        return users;
     }
-    
-    public void addEvent(Event event){
-        
+
+    public ArrayList<Person> getpersons() {
+        return persons;
     }
-    
+
+    public ArrayList<Event> getEvents() {
+        return events;
+    }
+
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
+    }
+
+    public void setpersons(ArrayList<Person> persons) {
+        this.persons = persons;
+    }
+
+    public void setEvents(ArrayList<Event> events) {
+        this.events = events;
+    }
 }

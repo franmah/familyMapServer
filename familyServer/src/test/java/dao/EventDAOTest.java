@@ -1,8 +1,11 @@
 package dao;
 
+import com.google.gson.Gson;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 import java.util.List;
+
 import models.Event;
 
 
@@ -143,4 +146,6 @@ public class EventDAOTest {
         assertTrue(success);
 
     }
+
+
 }

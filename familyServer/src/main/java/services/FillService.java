@@ -6,6 +6,8 @@ import java.time.LocalTime;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
+
 import java.util.Calendar;
 import java.util.Random;
 import dao.DataBaseException;
@@ -137,6 +139,7 @@ public class FillService{
 
         try {
             Gson gson = new Gson();
+
             JsonReader jsonReader = new JsonReader(new FileReader(location_file));
             locations = gson.fromJson(jsonReader, Locations.class);
 
@@ -148,15 +151,11 @@ public class FillService{
 
             jsonReader = new JsonReader(new FileReader(snames_file));
             last_names = gson.fromJson(jsonReader, FamilyNames.class);
-
-            //return true;
         }
         catch (Exception e){
             System.out.println(LocalTime.now() + " FillService.fillGeneratorObjects: Error: " + e.toString());
             e.printStackTrace();
-            //return false;
         }
-
     }
 
     /**
@@ -168,7 +167,6 @@ public class FillService{
      * @return  SuccessResponse or ErrorResponse with an explanation message.
      */
     public Response fillUserTree(String user_name, int num_generations){
-        System.out.println("TEST***********: username " + user_name + ", num: " + num_generations);
         if(user_name == null || num_generations < 0) {
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): Error: user_name null or num_generation < 0.");
             return new ErrorResponse("Wrong information");
@@ -177,12 +175,14 @@ public class FillService{
         // Check if the static call to load objects from json files worked.
         if(locations == null || female_names == null || males_names == null
             || last_names == null){
-            System.out.println(LocalTime.now() + " FillService.fillUserTree(): Error: json files for locations and names not loaded into objects.");
+            System.out.println(LocalTime.now() + " FillService.fillUserTree(): " +
+                            "Error: json files for locations and names not loaded into objects.");
+
             return new ErrorResponse("Internal Error: unable to generate family tree.");
         }
 
         num_events = 0;
-        num_person = 1; // start at 1: the user itself
+        num_person = 1; // starts at 1: the user itself
 
         boolean commit = false;
 
@@ -205,7 +205,8 @@ public class FillService{
             num_events++;
 
             System.out.println(LocalTime.now() + " FillService.fillUserTree(): generating family tree...");
-            Person user_person = generateTree(db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName()), user_name, num_generations, 1);
+            Person user_person = generateTree(db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName()),
+                                            user_name, num_generations, 1);
 
             // Update user with it's new parents
             db.getPerson_dao().updatePersonParents(user_person);
@@ -243,6 +244,7 @@ public class FillService{
             System.out.println(LocalTime.now() + " FillService.generateTree(): returning");
             return null;
         }
+
         System.out.println(LocalTime.now() + " FillService.generateTree(): generating generation #" + current_generation + "/" + num_generations);
 
         try {
@@ -283,7 +285,7 @@ public class FillService{
 
             // Generate marriage event for father and mother
             generateMarriage(mother, father);
-            System.out.println(LocalTime.now() + " FillService.generateTree(): Random event successfully generated marriage");
+            System.out.println(LocalTime.now() + " FillService.generateTree(): successfully generated marriage events");
             num_events += 2;
 
             mother.setSpouseId(father.getPersonId());
@@ -333,10 +335,13 @@ public class FillService{
         }
 
         return new Person(user_name, first_name, last_name, gender);
-
     }
 
-
+    /** Marry two person (plus pick a random date and location, both persons will have the same date)
+     *
+     * @param wife
+     * @param husband
+     */
     private void generateMarriage(Person wife, Person husband){
         System.out.println(LocalTime.now() + " FillService.generateMarriage(): generating marriage... ");
 
@@ -384,6 +389,7 @@ public class FillService{
         System.out.println(LocalTime.now() + " FillService.generateRandomEvent():generating random event...");
 
         String[] event_types = {"bar mitzvah", "baptism", "graduation", "retirement", "first job"};
+
         try {
             int type_index = Math.abs(rand.nextInt() % event_types.length);
 
@@ -423,12 +429,11 @@ public class FillService{
         assert  child != null;
 
         try {
-
             // Find child's birth date.
             Event child_birth = db.getEvent_dao().getBirthEvent(child.getPersonId(), user_name);
 
-            int year = child_birth.getYear() - ((Math.abs(rand.nextInt()) % 20) + 16);
-            // 20 and 16 to have a relatively possible age of birth compared to the child.
+            int year = child_birth.getYear() - ((Math.abs(rand.nextInt()) % 30) + 16);
+            // 30 and 16 to have a relatively possible age of birth compared to the child.
 
             // Find random location
             int location_index = Math.abs(rand.nextInt() % locations.getData().length);
@@ -455,11 +460,12 @@ public class FillService{
      */
     private void generateUserBirth(User user){
         assert user != null;
+        System.out.println(LocalTime.now() + " FillService.generateUserBirth: generating user birth...." );
 
         try{
             final int MAX_AGE = 90; // Range in which the random number can be.
 
-            // Calendar.YEAR return the current year.
+            // Generate year using current date
             Calendar calendar = Calendar.getInstance();   // Gets the current date and time
             int year = calendar.get(Calendar.YEAR) - (Math.abs(rand.nextInt() % MAX_AGE));
 
@@ -490,6 +496,11 @@ public class FillService{
 
         // Save user's person object
         Person person = db.getPerson_dao().getPerson(user.getPersonId(), user.getUserName());
+
+        if(person == null){
+            // If no person related to the user : create a new person for user:
+            person = new Person(user.getPersonId(), user.getUserName(), user.getFirstName(), user.getLastName(), user.getGender());
+        }
 
         // Delete any previous data related to the user
         db.getPerson_dao().deleteUserFamily(user.getUserName());

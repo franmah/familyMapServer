@@ -26,7 +26,8 @@ public class AuthTokenDAO{
         ResultSet result = null;
         PreparedStatement stmt = null;
 
-        String query = "SELECT * FROM authtokens WHERE token = ?"; // Look for a token because there can be multiple same user but only one token.
+        String query = "SELECT * FROM authtokens WHERE token = ?";
+        // Look for a token because there can be multiple same user but only one token.
 
         try{
             stmt = connection.prepareStatement(query);
@@ -38,8 +39,7 @@ public class AuthTokenDAO{
             if(result.next()){
                 user_name = result.getString("user_name");
                 System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): A pair user/token has been found for: \"" +
-                               user_name + "\"");
-
+                                    user_name + "\"");
             }
             else{
                 System.out.println(LocalTime.now() + " AuthToken.isConnected(): No user found for this token");
@@ -54,26 +54,18 @@ public class AuthTokenDAO{
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): ERROR while retrieving data: " + e.toString());
+            e.printStackTrace();
             throw new DataBaseException("Error while retrieving token from database");
         }
         finally {
-            if(result != null){
-                try{
-                    result.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): ERROR Unable to close resultSet, " + e.toString());
-                    throw new DataBaseException("Unable to retrieve token from database");
-                }
+            try {
+                if (result != null) { result.close(); }
+                if (stmt != null) { stmt.close(); }
             }
-            if(stmt != null){
-                try{
-                    stmt.close();
-                }
-                catch (Exception e){
-                    System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): ERROR Unable to close prepared statement, " + e.toString());
-                    throw new DataBaseException("Unable to retrieve token from database");
-                }
+            catch (Exception e) {
+                System.out.println(LocalTime.now() + " AuthTokenDAO.isConnected(): ERROR Unable to close resultSet, " + e.toString());
+                e.printStackTrace();
+                throw new DataBaseException("Unable to retrieve token from database");
             }
         }
     }
@@ -84,28 +76,26 @@ public class AuthTokenDAO{
      * @return  true if the token is added, else return an error.
      */
     public boolean addToken(AuthToken token) throws DataBaseException{
+
         // check if user is already connected
         String test_connection = isConnected(token.getToken());
         if(test_connection != null){
             System.out.println(LocalTime.now() + "  AuthTokenDao.addToken(): ERROR: User is already connected ");
-            throw  new DataBaseException("User already connected");
+            throw new DataBaseException("User already connected");
         }
 
-        // Create update statement:
         String query = "INSERT INTO authtokens VALUES(?,?);";
 
         PreparedStatement stmt = null;
 
         try{
-
             stmt = connection.prepareStatement(query);
-
             stmt.setString(1, token.getToken());
             stmt.setString(2, token.getUser());
-
             stmt.executeUpdate();
 
-            System.out.println(LocalTime.now() + " AuthTokenDao.addToken(): Token for the user: \"" + token.getUser() + "\" has been added");
+            System.out.println(LocalTime.now() + " AuthTokenDao.addToken(): Token for the user: \"" +
+                                token.getUser() + "\" has been added");
             return true;
         }
         catch(DataBaseException message){
@@ -124,6 +114,7 @@ public class AuthTokenDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " AuthTokenDao.addToken(): ERROR Unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
                     throw new DataBaseException("Unable to connect user");
                 }
             }
@@ -131,12 +122,18 @@ public class AuthTokenDAO{
 
     }
 
+    /** Delete every entry in authtokens table.
+     *
+     * @return true is the table has been cleared.
+     * @throws DataBaseException
+     */
     public boolean deleteTokens() throws  DataBaseException{
+
+        String query = "DELETE FROM authtokens;";
 
         PreparedStatement stmt = null;
 
         try{
-            String query = "DELETE FROM authtokens;";
             stmt = connection.prepareStatement(query);
             stmt.executeUpdate();
 
@@ -149,6 +146,7 @@ public class AuthTokenDAO{
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " AuthTokenDAO.deleteTokens(): ERROR while deleting data from authtokens: " + e.toString());
+            e.printStackTrace();
             throw new DataBaseException("Error while deleting data from authtokens table");
         }
         finally {
@@ -158,6 +156,7 @@ public class AuthTokenDAO{
                 }
                 catch (Exception e){
                     System.out.println(LocalTime.now() + " AuthTokenDAO.deleteTokens(): ERROR unable to close prepared statement, " + e.toString());
+                    e.printStackTrace();
                     throw new DataBaseException("Unable to delete tokens");
                 }
             }

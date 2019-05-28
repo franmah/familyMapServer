@@ -14,11 +14,8 @@ import models.AuthToken;
  */
 public class OperationDAO{
 
-    private final String CURR_DIR = System.getProperty("user.dir");
     private final String DRIVER = "org.sqlite.JDBC";
     private final String DB_TYPE = "jdbc:sqlite:";
-    // CURR_DIR doesn't give the file's path
-    //private final String DB_LOCATION = String.format(CURR_DIR + File.separator + ".." + File.separator + "database" + File.separator + "familyServerDB.db");
     private final String DB_LOCATION = ("C:\\Users\\Francois\\AndroidStudioProjects\\fma\\familyServer\\src\\main\\java\\database\\familyServerDB.db");
 
     Connection connection = null;
@@ -58,10 +55,10 @@ public class OperationDAO{
      */
     public void createDataBase() throws DataBaseException{
 
-        final String CREATE_TABLES_QUERY = ("C:\\Users\\Francois\\AndroidStudioProjects\\fma\\familyServer\\src\\main\\java\\SQLcode\\InitializeDataBase.sql.txt");
-        //final String CREATE_TABLES_QUERY = CURR_DIR + File.separator +".." + File.separator + "SQLcode" + File.separator + "initializeDataBase.sql.txt";
+        final String CREATE_TABLES_FILE = ("C:\\Users\\Francois\\AndroidStudioProjects\\fma\\familyServer\\src\\main\\java\\SQLcode\\InitializeDataBase.sql.txt");
 
         Statement stmt = null;
+
         try{
 
             Class.forName(DRIVER);
@@ -69,20 +66,17 @@ public class OperationDAO{
             System.out.println("Data Base file has been created");
 
             // Create TABLES from sql file.
-            String query = createQueryFromFile(CREATE_TABLES_QUERY);
-            //System.out.println(query);
+            String query = createQueryFromFile(CREATE_TABLES_FILE);
 
             stmt = connection.createStatement();
             stmt.executeUpdate(query);
             System.out.println(LocalTime.now() + " OperationDAO.createDataBase(): Tables have been created with success!");
 
-            // FIX IT:
-            stmt.close();
-
         }
         catch(Exception e){
             System.out.println(LocalTime.now() + " OperationDAO.createDataBase(): Error: " + e.toString());
 
+            // If database file is created but not filled with tables: try to delete the file
             File new_db = new File(DB_LOCATION);
             if(new_db.delete()){
                 System.out.println("The newly created database file has been deleted with success.");
@@ -91,7 +85,17 @@ public class OperationDAO{
                 System.out.println("The newly created database could not be deleted.");
             }
 
-            throw new DataBaseException("Database couldn't be created");
+            throw new DataBaseException("Error while creating database");
+        }
+        finally {
+            try{
+                if( stmt != null) { stmt.close(); }
+            }
+            catch (Exception e){
+                System.out.println(LocalTime.now() + " OperationDAO.createDataBase(): unable to close ressource" + e.toString());
+                e.printStackTrace();
+                throw new DataBaseException("Error While creating database");
+            }
         }
 
     }
@@ -129,7 +133,7 @@ public class OperationDAO{
      * Open a connection to the database.
      * @return   connection: connection used by the two public methods ExecuteUpdate and executeQuery.
      */
-    public void openConnection() throws DataBaseException{
+    private void openConnection() throws DataBaseException{
         //Test if db exists:
         File db_file = new File(DB_LOCATION);
 
@@ -139,7 +143,6 @@ public class OperationDAO{
                 System.out.println(LocalTime.now() + " OperationDAO.openConnection(): WARNING: the data base file doesn't exit, creating file...");
                 this.createDataBase();
                 connection.setAutoCommit(false);
-                //System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
             }
 
             // Open and return connection
@@ -148,15 +151,10 @@ public class OperationDAO{
             connection.setAutoCommit(false);
             System.out.println(LocalTime.now() + " OperationDAO.openConnection(): connection successful.");
         }
-        //catch(DataBaseException message){
-            //throw new DataBaseException(message.toString());
-        //}
         catch(Exception e){
             System.out.println(LocalTime.now() + " OperationDAO.openConnection(): Error: " + e);
             throw new DataBaseException("Connection to the database failed.");
         }
-
-
     }
 
     /**
@@ -176,10 +174,12 @@ public class OperationDAO{
 
                 connection.close();
                 if(commit) {
-                    System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): connection has been closed and changes were committed");
+                    System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): " +
+                                        "connection has been closed and changes were committed");
                 }
                 else{
-                    System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): connection has been closed and changes were not committed");
+                    System.out.println(LocalTime.now() + " OperationDAO.commitAndCloseConnection(): " +
+                                        "connection has been closed and changes were not committed");
                 }
             }
             catch(Exception e){
@@ -189,16 +189,4 @@ public class OperationDAO{
             }
         }
     }
-
-    public void commitChanges() throws  DataBaseException{
-        try {
-            connection.commit();
-        }
-        catch (Exception e){
-            System.out.println(LocalTime.now() + " OperationDAO.commitChanges() : ERROR: unable to commit changes");
-        }
-    }
-
-
-////////////////////////////////////////////////
 }

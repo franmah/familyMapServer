@@ -46,7 +46,7 @@ public class FileHandler implements HttpHandler{
                     success = true;
                 }
                 else{
-                    System.out.println(LocalTime.now() + " FileHandler: final not found");
+                    System.out.println(LocalTime.now() + " FileHandler: file not found");
                 }
             }
 

@@ -5,6 +5,7 @@ import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.sql.Connection;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import static org.junit.Assert.*;
@@ -133,6 +134,32 @@ public class UserDAOTest {
         }
         catch (Exception e){
             success = true;
+        }
+
+        assertTrue(success);
+    }
+
+    @Test
+    public void getUserAllPass() throws Exception{
+        UserDAO user_dao = db.getUser_dao();
+
+        final int NUM_ROWS = 10;
+
+        for(int i = 0; i < NUM_ROWS; i++) {
+            user_dao.addUser(new User("test" + i, "password", "test@test.com", "this",
+                    "test", "f", "test_id"));
+        }
+
+        boolean success = false;
+
+        try{
+            ArrayList<User> people = user_dao.getUserAll();
+            if(people.size() == NUM_ROWS){
+                success = true;
+            }
+        }
+        catch (Exception e){
+            success = false;
         }
 
         assertTrue(success);
